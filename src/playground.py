@@ -39,6 +39,22 @@ def limpiar_terminal() -> None:
     return None
 
 
+def mostrar_menu():
+    """
+    Muestra el menu inicial.
+    """
+    # TODO Quizá opcion 4 para ver configuracion inicial, creditos u otros.
+    return """
+        =========================================
+                     HUNDIR LA FLOTA             
+        =========================================
+           1. Iniciar una nueva partida
+           2. Continuar una partida guardada
+           3. Salir
+        =========================================
+"""
+
+
 def crear_carpeta_configuracion_inicial():
     """
     Crea la carpeta inicial donde se guardarán las partidas del juego.
@@ -55,6 +71,8 @@ def crear_carpeta_configuracion_inicial():
 
 def main():
     crear_carpeta_configuracion_inicial()
+    limpiar_terminal()
+    print(mostrar_menu())
 
 
 if __name__ == "__main__":
