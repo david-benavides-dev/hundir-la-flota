@@ -1,15 +1,20 @@
-# def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre_partida: str, nombrej1: str, nombrej2: str) -> None:
-#     """
-    
-#     """
-#     # Modifica la configuración por defecto con el nombre que queramos darle a la partida
-#     config_default['nombre_partida'] = nombre_partida
+# TODO
+# Tablero y barcos de cada jugador en sus respectivos archivos config.
+# Logica del juego sin usar json para luego aplicarlo al mismo.
 
-#     # Crea la carpeta con el nombre de la partida dentro del root partidas_hundirflota.
-#     if not os.path.exists(f"{carpeta_root}/{nombre_partida}"):
-#         os.mkdir(f"{carpeta_root}/{nombre_partida}")
+"""
+Posible flujo:
+    Carga json
+    Lee dict
+    jugador1 hace x
+    jugador2 espera
+    Guarda el dict
+    Guarda dict en json
 
-#     # Genera el archivo de configuracion inicial json con el nombre de la partida dentro de la carpeta con su mismo nombre en root.
-#     with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.json", "w") as archivo:
-#         json.dump(datos_iniciales, archivo, indent = 4)
-#         print("Archivo de configuración creado con éxito")
+    Carga json
+    Lee dict
+    jugador2 hace x
+    jugador 1 espera
+    Guarda el dict
+    Guarda dict en json
+"""
