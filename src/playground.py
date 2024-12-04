@@ -2,7 +2,22 @@ import os
 import time
 import json
 
-opciones = {"1","2","3"}
+opciones = "1","2","3"
+carpetas_ficheros = 'src/partidas_hundirflota'
+
+config_default = {
+    "nombre_partida": "MiPartida",
+    "dimensiones_tablero": 10,
+    "tiempo_refresco": 2,
+    "tiempo_ataque": 30,
+    "configuracion_barcos": {
+        "Portafritura": {"tamano": 5, "numero": 1},
+        "Gamba de Oro": {"tamano": 2, "numero": 2},
+        "Barquita de la Caseria": {"tamano": 1, "numero": 3}
+    },
+    "turnos_jugados": 0,
+    "turno_actual": "j1"
+}
 
 # 1. Se crea una carpeta en x directorio llamada partidas_hundirflota. EJ:
 #     C:\Usuarios\User\AppData\Local\partidas_hundirflota
@@ -10,7 +25,7 @@ opciones = {"1","2","3"}
 #             C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1
 #                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1\config.json
 #                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1\j1.json
-#                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1.j2.json
+#                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1\j2.json
 
 # 2. Al inicializar el programa, se muestra un menu para seleccionar si quieres crear una partida o continuar una ya empezada (para el caso del 2º player por ej).
 # 3. Si se selecciona cear partida, se pedira nombre de la partida y se verificará que la partida no existe, en el caso de ya existir, se pedirá si quiere empezar de 0 o continuarla.
@@ -40,12 +55,13 @@ def limpiar_terminal() -> None:
     return None
 
 
-def azul(texto: str, intensidad: int):
-    "Recibe un texto y un número y retorna el texto con un color ANSI apropiado dependiendo del parámetro dado."
+# Funciones para colores
+def azul(texto: str, intensidad: int = 39):
+    "Recibe un texto y un número y retorna el texto con un color ANSI apropiado dependiendo del parámetro dado en rango de azules."
     return f"\033[38;5;{intensidad}m{texto}\033[0m"
 
 
-def mostrar_menu():
+def mostrar_menu() -> str:
     """
     Muestra el menu inicial.
     """
@@ -71,14 +87,14 @@ def mostrar_menu():
 
     # TODO Quizá opcion 4 para ver configuracion inicial, creditos u otros.
     return f"""
-        {azul("=========================================", 39)}
+        {azul("=========================================")}
                     {titulo}             
-        {azul("=========================================", 39)}
+        {azul("=========================================")}
            1. ⚓ Iniciar una nueva partida
            2. 🌊 Continuar una partida guardada
            3. 🚪 Salir
-        {azul("=========================================", 39)}
-"""
+        {azul("=========================================")}
+        """
 
 
 def pedir_opcion() -> int:
@@ -94,25 +110,49 @@ def pedir_opcion() -> int:
     return int(opcion)
 
 
-def crear_carpeta_configuracion_inicial():
+def crear_carpeta_inicial(carpeta_root: str) -> None:
     """
     Crea la carpeta inicial donde se guardarán las partidas del juego.
     """
-
-    # Carpeta root (#TODO cambiar para carpeta compartida)
-    carpeta_root = 'src/partidas_hundirflota'
-
-
     if not os.path.exists(carpeta_root):
         os.mkdir(carpeta_root)
         print(f"Carpeta inicial creada con éxito.")
 
+    return None
+
+
+def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre_partida: str, nombrej1: str, nombrej2: str) -> None:
+    """
+    
+    """
+    # Modifica la configuración por defecto con el nombre que queramos darle a la partida
+    config_default['nombre_partida'] = nombre_partida
+
+    # Crea la carpeta con el nombre de la partida dentro del root partidas_hundirflota.
+    if not os.path.exists(f"{carpeta_root}/{nombre_partida}"):
+        os.mkdir(f"{carpeta_root}/{nombre_partida}")
+
+    # Genera el archivo de configuracion inicial json con el nombre de la partida dentro de la carpeta con su mismo nombre en root.
+    with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.json", "w") as archivo:
+        json.dump(datos_iniciales, archivo, indent = 4)
+        print("Archivo de configuración creado con éxito")
+
 
 def main():
-    crear_carpeta_configuracion_inicial()
+    crear_carpeta_inicial(carpetas_ficheros)
+
     limpiar_terminal()
+
     print(mostrar_menu())
-    pedir_opcion()
+
+    opcion = pedir_opcion()
+
+    if opcion == 1:
+        limpiar_terminal()
+        nombre_j1 = input("Nombre J1 >> ")
+        nombre_j2 = input("Nombre J2 >> ")
+        nombre_partida = input("Introduce el nombre de la partida >> ")
+        crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, nombre_j1, nombre_j2)
 
 
 if __name__ == "__main__":
