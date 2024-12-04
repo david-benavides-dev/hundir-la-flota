@@ -2,6 +2,7 @@ import os
 import time
 import json
 
+opciones = {"1","2","3"}
 
 # 1. Se crea una carpeta en x directorio llamada partidas_hundirflota. EJ:
 #     C:\Usuarios\User\AppData\Local\partidas_hundirflota
@@ -39,20 +40,58 @@ def limpiar_terminal() -> None:
     return None
 
 
+def azul(texto: str, intensidad: int):
+    "Recibe un texto y un número y retorna el texto con un color ANSI apropiado dependiendo del parámetro dado."
+    return f"\033[38;5;{intensidad}m{texto}\033[0m"
+
+
 def mostrar_menu():
     """
     Muestra el menu inicial.
     """
+    titulo = (
+        azul("P", 27) +
+        azul("I", 33) +
+        azul("R", 39) +
+        azul("A", 45) +
+        azul("T", 51) +
+        azul("A", 45) +
+        azul("S", 39) +
+        azul(" ", 33) +
+        azul("C", 27) +
+        azul("A", 33) +
+        azul("L", 39) +
+        azul("E", 45) +
+        azul("T", 51) +
+        azul("E", 45) +
+        azul("R", 39) +
+        azul("O", 33) +
+        azul("S", 27)
+    )
+
     # TODO Quizá opcion 4 para ver configuracion inicial, creditos u otros.
-    return """
-        =========================================
-                     HUNDIR LA FLOTA             
-        =========================================
-           1. Iniciar una nueva partida
-           2. Continuar una partida guardada
-           3. Salir
-        =========================================
+    return f"""
+        {azul("=========================================", 39)}
+                    {titulo}             
+        {azul("=========================================", 39)}
+           1. ⚓ Iniciar una nueva partida
+           2. 🌊 Continuar una partida guardada
+           3. 🚪 Salir
+        {azul("=========================================", 39)}
 """
+
+
+def pedir_opcion() -> int:
+    """
+    Pedir opcion porrillero edition por ahora, just testing.
+    """
+    opcion = None
+    while not opcion:
+        opcion = input("Yaaarrr? >> ")
+        if opcion not in opciones:
+            print("Opción no válida")
+            opcion = None
+    return int(opcion)
 
 
 def crear_carpeta_configuracion_inicial():
@@ -73,6 +112,7 @@ def main():
     crear_carpeta_configuracion_inicial()
     limpiar_terminal()
     print(mostrar_menu())
+    pedir_opcion()
 
 
 if __name__ == "__main__":
