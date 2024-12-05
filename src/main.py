@@ -141,9 +141,17 @@ def generar_flota(config_barcos: dict) -> dict:
     for nombre, datos in config_barcos.items():
         for i in range(1, datos["numero"] + 1):
             barco_nombre = f"{nombre}{i}"
-            estado = {f"[]": " " for _ in range(datos["tamano"])}
+
+            estado = {}
+            for j in range(datos["tamano"]):
+                estado[f"[{j+1}]"] = " "
+
+            coordenadas = []
+            for _ in range(datos["tamano"]):
+                coordenadas.append([])
+
             barcos[barco_nombre] = {
-                "coordenadas": [[] for _ in range(datos["tamano"])],
+                "coordenadas": coordenadas,
                 "estado": estado
             }
 
