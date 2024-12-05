@@ -3,6 +3,7 @@ import time
 import json
 
 opciones = "1","2","3"
+# TODO cambiar a carpeta para MP maybe permitir al usuario selccionar carpeta (doubt)
 carpetas_ficheros = 'src/partidas_hundirflota'
 
 config_default = {
@@ -18,6 +19,15 @@ config_default = {
     "turnos_jugados": 0,
     "turno_actual": "j1"
 }
+
+config_barcos = {
+        "Portafritura": {
+            "tamano": 5, "numero": 1},
+        "Gamba de Oro": {
+            "tamano": 2, "numero": 2},
+        "Barquita de la Caseria": {
+            "tamano": 1, "numero": 3}
+    }
 
 
 # 1. Se crea una carpeta en x directorio llamada partidas_hundirflota. EJ:
@@ -121,13 +131,39 @@ def crear_carpeta_inicial(carpeta_root: str) -> None:
     return None
 
 
+# Genera la flota de barcos.
+def generar_flota(config_barcos: dict) -> dict:
+    """
+    
+    """
+    barcos = {}
+
+    for nombre, datos in config_barcos.items():
+        for i in range(1, datos["numero"] + 1):
+            barco_nombre = f"{nombre}{i}"
+            estado = {f"[]": " " for _ in range(datos["tamano"])}
+            barcos[barco_nombre] = {
+                "coordenadas": [[] for _ in range(datos["tamano"])],
+                "estado": estado
+            }
+
+    return barcos
+
+
 def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre_partida: str, nombrej1: str, nombrej2: str) -> None:
     """
     
     """
-    nombres = nombrej1, nombrej2
+    if nombrej1 and nombrej2 != "":
+        nombres = nombrej1, nombrej2
+    else:
+        nombres = "Jugador1", "Jugador2"
+
     # Modifica la configuración por defecto con el nombre que queramos darle a la partida
-    config_default['nombre_partida'] = nombre_partida
+    if nombre_partida != "":
+        config_default['nombre_partida'] = nombre_partida
+    else:
+        nombre_partida = config_default['nombre_partida']
 
     # Crea la carpeta con el nombre de la partida dentro del root partidas_hundirflota.
     if not os.path.exists(f"{carpeta_root}/{nombre_partida}"):
@@ -138,11 +174,19 @@ def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre
         json.dump(datos_iniciales, archivo, indent = 4)
         print("Archivo de configuración creado con éxito")
 
-    tablero = crear_tablero(5)
+    tablero = crear_tablero(config_default['dimensiones_tablero'])
+    flota = generar_flota(config_barcos)
+
     # Genera el archivo de configuracion de cada jugador
     for i in range(1, 2+1):
+        config_jugador = {"nombre": nombres[i-1],
+                          "tablero": tablero,
+                          "movimientos": [{}],
+                          "barcos": flota
+                          }
+
         with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.{nombres[i-1]}.j{i}.json", "w") as archivo:
-            json.dump(datos_iniciales, archivo, indent = 4)
+            json.dump(config_jugador, archivo, indent = 2)
             print(f"Archivo de jugador{i} creado con éxito.")
     
 
@@ -203,10 +247,18 @@ def main():
         nombre_j2 = input("Nombre J2 >> ")
         nombre_partida = input("Introduce el nombre de la partida >> ")
         crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, nombre_j1, nombre_j2)
+        print("Comenzando partida")
+        time.sleep(2)
+        limpiar_terminal()
+        print("Limpiando los barquitos")
+        time.sleep(2)
+        print("Preparando las gambitas...")
+        time.sleep(1)
+        print("Echándole pienso a la criatura...")
         time.sleep(2)
         limpiar_terminal()
         tablero1 = crear_tablero(10)
-        print(mostrar_tablero(tablero1, nombre_j1))
+        print(mostrar_tablero(tablero1))
         input(f"\nJUGADOR: {nombre_j1}\nColoca tu Barquita de la Caseria >> ")
         
 
