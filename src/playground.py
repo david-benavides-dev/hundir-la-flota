@@ -1,5 +1,4 @@
 # TODO
-# Tablero y barcos de cada jugador en sus respectivos archivos config.
 # Logica del juego sin usar json para luego aplicarlo al mismo.
 
 """

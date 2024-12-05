@@ -38,7 +38,7 @@ config_barcos = {
 #                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1\j1.json
 #                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1\j2.json
 # 2. Al inicializar el programa, se muestra un menu para seleccionar si quieres crear una partida o continuar una ya empezada (para el caso del 2º player por ej).
-# 3. Si se selecciona Iniciar nueva partida, se pedira nombre de la partida y se verificará que la partida no existe, en el caso de ya existir, se pedirá si quiere empezar de 0 o continuarla.
+# TODO 3. Si se selecciona Iniciar nueva partida, se pedira nombre de la partida y se verificará que la partida no existe, en el caso de ya existir, se pedirá si quiere empezar de 0 o continuarla.
 #   - Caso de no existir, se creará una carpeta con el nombre de la partida mas toda la configuración inicial, tanto base como J1 y J2.
 
 
@@ -67,7 +67,7 @@ def limpiar_terminal() -> None:
 
 # Funciones para colores
 def azul(texto: str, intensidad: int = 39):
-    "Recibe un texto y un número y retorna el texto con un color ANSI apropiado dependiendo del parámetro dado en rango de azules."
+    "Recibe un texto y un número y retorna el texto con un color ANSI apropiado dependiendo del parámetro dado."
     return f"\033[38;5;{intensidad}m{texto}\033[0m"
 
 
@@ -113,7 +113,7 @@ def pedir_opcion() -> int:
     """
     opcion = None
     while not opcion:
-        opcion = input("Yaaarrr? >> ")
+        opcion = input(azul("Yaaarrr? >> "))
         if opcion not in opciones:
             print("Opción no válida")
             opcion = None
@@ -205,24 +205,24 @@ def mostrar_tablero(tablero):
     indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     i = 0
 
-    parte_arriba = "\n"
+    parte_arriba = "\n "
     for fila in tablero:
-        parte_arriba += f"  {indice_letras[i]} "
+        parte_arriba += f" {indice_letras[i]} "
         i += 1
 
     parte_arriba += "\n"
 
-    separador_lineas = "-" * (len(tablero[0]) * 4) + "-"
+    separador_lineas = "-" * (len(tablero[0]) * 3) + "--"
 
     i = 1
 
     tablero_completo = ""
 
     for fila in tablero:
-        tablero_completo += f"\n| {' | '.join(map(str, fila))} | {i}" + f"\n{separador_lineas}"
+        tablero_completo += f"\n{azul("|", 39)} {'  '.join(map(str, fila))} {azul("|", 39)} {i}" + f""
         i += 1
     
-    tablero_completo = parte_arriba + separador_lineas + tablero_completo
+    tablero_completo = parte_arriba + azul(separador_lineas, 39) + tablero_completo + "\n" + azul(separador_lineas, 39)
     return tablero_completo
 
 
@@ -240,6 +240,122 @@ def crear_tablero(dimension: int) -> list:
     return tablero
 
 
+def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple]) -> bool:
+    """
+    Coloca un barco en el tablero si las coordenadas son válidas.
+    
+    Args:
+        tablero (list): Tablero del jugador.
+        barco (dict): Diccionario que representa el barco.
+        coordenadas (list[tuple]): Lista de coordenadas donde colocar el barco.
+    
+    Returns:
+        bool: True si el barco se colocó correctamente, False si hubo un error.
+    """
+
+
+def leer_archivo_jugador(carpeta: str, nombre_partida: str, jugador: str) -> dict:
+    """
+    Lee el archivo JSON de un jugador específico.
+    
+    Args:
+        carpeta (str): Ruta a la carpeta donde se encuentra el archivo de la partida.
+        nombre_partida (str): Nombre de la partida.
+        jugador (str): Identificador del jugador ("j1" o "j2").
+    
+    Returns:
+        dict: Contenido del archivo del jugador en forma de diccionario.
+    """
+
+
+def guardar_archivo_global(carpeta: str, nombre_partida: str, datos: dict) -> None:
+    """
+    Guarda los cambios en el archivo global de configuración de la partida.
+    
+    Args:
+        carpeta (str): Ruta a la carpeta donde se encuentra el archivo de la partida.
+        nombre_partida (str): Nombre de la partida.
+        datos (dict): Contenido actualizado del archivo global.
+    
+    Returns:
+        None
+    """
+
+
+def guardar_archivo_jugador(carpeta: str, nombre_partida: str, jugador: str, datos: dict) -> None:
+    """
+    Guarda los cambios en el archivo JSON de un jugador.
+    
+    Args:
+        carpeta (str): Ruta a la carpeta donde se encuentra el archivo de la partida.
+        nombre_partida (str): Nombre de la partida.
+        jugador (str): Identificador del jugador ("j1" o "j2").
+        datos (dict): Contenido actualizado del archivo del jugador.
+    
+    Returns:
+        None
+    """
+
+
+def leer_archivo_global(carpeta: str, nombre_partida: str) -> dict:
+    """
+    Lee el archivo global de configuración de la partida.
+    
+    Args:
+        carpeta (str): Ruta a la carpeta donde se encuentra el archivo de la partida.
+        nombre_partida (str): Nombre de la partida.
+    
+    Returns:
+        dict: Contenido del archivo global en forma de diccionario.
+    """
+
+
+def pedir_numero(msj):
+    """
+    
+    """
+    num = False
+    while not num:
+        num = input(msj)
+        if validar_numero(num):
+            return int(num)
+        else:
+            num = False
+
+
+def validar_numero(num: str) -> bool:
+    """
+    
+    """
+    try:
+        int(num)
+        return True
+    except ValueError:
+        print("*ERROR* El número no es válido.")
+        return False
+
+
+def pedir_nombres():
+    """
+    
+    """
+    pass
+
+
+def comenzar_partida():
+    """
+    
+    """
+    pass
+
+
+def jugar():
+    """
+    
+    """
+    pass
+
+
 def main():
     crear_carpeta_inicial(carpetas_ficheros)
 
@@ -248,26 +364,30 @@ def main():
     print(mostrar_menu())
 
     opcion = pedir_opcion()
-
-    if opcion == 1:
-        limpiar_terminal()
-        nombre_j1 = input("Nombre J1 >> ")
-        nombre_j2 = input("Nombre J2 >> ")
-        nombre_partida = input("Introduce el nombre de la partida >> ")
-        crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, nombre_j1, nombre_j2)
-        print("Comenzando partida")
-        time.sleep(2)
-        limpiar_terminal()
-        print("Limpiando los barquitos")
-        time.sleep(2)
-        print("Preparando las gambitas...")
-        time.sleep(1)
-        print("Echándole pienso a la criatura...")
-        time.sleep(2)
-        limpiar_terminal()
-        tablero1 = crear_tablero(10)
-        print(mostrar_tablero(tablero1))
-        input(f"\nJUGADOR: {nombre_j1}\nColoca tu Barquita de la Caseria >> ")
+    match opcion:
+        case 1:
+            nombre_j1 = input(azul("Nombre J1 >> "))
+            nombre_j2 = input(azul("Nombre J2 >> "))
+            nombre_partida = input(azul("Introduce el nombre de la partida >> "))
+            crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, nombre_j1, nombre_j2)
+            print("Comenzando partida")
+            time.sleep(2)
+            limpiar_terminal()
+            print("Limpiando los barquitos")
+            time.sleep(2)
+            print("Preparando las gambitas...")
+            time.sleep(1)
+            print("Echándole pienso a la criatura...")
+            time.sleep(2)
+            limpiar_terminal()
+            tablero1 = crear_tablero(10)
+            print(mostrar_tablero(tablero1))
+            input(f"\nJUGADOR: {nombre_j1}\nColoca tu Barquita de la Caseria >> ")
+        case 2:
+            nombre_partida = input(azul("Introduce el nombre de la partida >> "))
+        case 3:
+            exit
+    
         
 
 
