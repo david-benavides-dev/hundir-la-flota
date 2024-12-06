@@ -1,7 +1,16 @@
 # TODO
 # Logica del juego sin usar json para luego aplicarlo al mismo.
+import json
 
 
+config_barcos = {
+        "Portafritura": {
+            "tamano": 5, "numero": 1},
+        "Gamba de Oro": {
+            "tamano": 2, "numero": 2},
+        "Barquita de la Caseria": {
+            "tamano": 1, "numero": 3}
+    }
 
 """
 
@@ -83,7 +92,7 @@ def generar_flota(config_barcos: dict) -> dict:
     return barcos
 
 
-def pedir_coordenadas(barco: dict, msj: str) -> tuple:
+def pedir_coordenadas(msj: str) -> tuple:
     """
     """
     validar_coordenadas = False
@@ -92,9 +101,7 @@ def pedir_coordenadas(barco: dict, msj: str) -> tuple:
             x, y = input(msj).split(",")
             if validar_num(x) and validar_num(y):
                 # Limpia directamente los espacios en el caso de que un usuario los introduzca en el input al pasarlos a int.
-                coordenadas = (int(x), int(y))
-                validar_coordenadas = True
-                return coordenadas
+                return int(x), int(y)
         except ValueError:
             print("*ERROR*")
             validar_coordenadas = False
@@ -106,7 +113,7 @@ def validar_num(num:str) -> bool:
         return True
     except ValueError:
         print("*ERROR* Debes introducir números")
-        False
+        return False
 
 
 def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple]) -> bool:
@@ -121,24 +128,56 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple]) -> bool:
     Returns:
         bool: True si el barco se colocó correctamente, False si hubo un error.
     """
-    y,x = coordenadas
+    x, y = coordenadas
 
     try:
         for i in range(barco['tamano']):
-            tablero[y-1][x+i-1] = "A"
+            if tablero[y-1][x+i-1] != "~":
+                raise Exception("*ERROR* No puedes colocar el barco ahí")
+            tablero[y-1][x+i-1] = "B"
         return True
     except IndexError:
         print("*ERROR* No puedes colocar el barco ahí")
+        return False
+    except Exception as e:
+        print(e)
         return False
 
 
 Barquita_de_la_Caseria = {
             "tamano": 1, "numero": 3}
 
+
+def crear_configuracion_jugador(barcos: dict, num_jugador: int, nombre_jugador: str, nombre_partida: str):
+    """
+    
+    """
+    tablero = crear_tablero()
+    for nombre, datos in config_barcos.items():
+        i = 0
+        while i < datos["numero"]:
+            coordenadas = pedir_coordenadas(f"Introduce coordenadas para '{nombre}' ({i+1}/{datos['numero']}) >> ")
+            if colocar_barco(tablero, datos, coordenadas):
+                print(mostrar_tablero(tablero))
+                i += 1
+
+    flota = barcos
+    config_jugador = {"nombre": nombre_jugador,
+                          "tablero": tablero,
+                          "movimientos": [{}],
+                          "barcos": flota
+                          }
+
+    # with open(f"'src/partidas_hundirflota'/{nombre_partida}/{nombre_partida}.{nombre_jugador}.j{num_jugador}.json", "w") as archivo:
+    #     json.dump(config_jugador, archivo, indent = 2)
+    #     print(f"Archivo de jugador{i} creado con éxito.")
+    return config_jugador
+
 tablero = crear_tablero()
-coordenadas = pedir_coordenadas(Barquita_de_la_Caseria, "Introduce las coordenadas: ")
-colocar_barco(tablero, Barquita_de_la_Caseria, coordenadas)
+
+jugador_1 = crear_configuracion_jugador(config_barcos, 1, "david", "Partida")
 print(mostrar_tablero(tablero))
+print(jugador_1)
 
 
 """
@@ -150,6 +189,7 @@ CREAR PARTIDA
         Genera carpeta inicial
         Genera subcarpeta con el nombre de la partida
             Pide a J1 que ponga los barcos en su tablero
+        Genera el archivo de J1
     Queda esperando a que exista el archivo J2
 
 UNIRSE A PARTIDA
@@ -158,6 +198,7 @@ UNIRSE A PARTIDA
         Valida que exista archivo J1
     Pide nombre del jugador
         Pide al J2 que ponga los barcos en su tablero
+        Genera el archivo de J2
     Valida que exista J1 y J2
 
 JUEGO
