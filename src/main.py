@@ -65,8 +65,8 @@ def limpiar_terminal() -> None:
     return None
 
 
-# Funciones para colores
-def azul(texto: str, intensidad: int = 39):
+# Funcion para colores
+def color(texto: str, intensidad: int = 39):
     "Recibe un texto y un número y retorna el texto con un color ANSI apropiado dependiendo del parámetro dado."
     return f"\033[38;5;{intensidad}m{texto}\033[0m"
 
@@ -76,34 +76,34 @@ def mostrar_menu() -> str:
     Muestra el menu inicial.
     """
     titulo = (
-        azul("P", 27) +
-        azul("I", 33) +
-        azul("R", 39) +
-        azul("A", 45) +
-        azul("T", 51) +
-        azul("A", 45) +
-        azul("S", 39) +
-        azul(" ", 33) +
-        azul("C", 27) +
-        azul("A", 33) +
-        azul("L", 39) +
-        azul("E", 45) +
-        azul("T", 51) +
-        azul("E", 45) +
-        azul("R", 39) +
-        azul("O", 33) +
-        azul("S", 27)
+        color("P", 27) +
+        color("I", 33) +
+        color("R", 39) +
+        color("A", 45) +
+        color("T", 51) +
+        color("A", 45) +
+        color("S", 39) +
+        color(" ", 33) +
+        color("C", 27) +
+        color("A", 33) +
+        color("L", 39) +
+        color("E", 45) +
+        color("T", 51) +
+        color("E", 45) +
+        color("R", 39) +
+        color("O", 33) +
+        color("S", 27)
     )
 
     # TODO Quizá opcion 4 para ver configuracion inicial, creditos u otros.
     return f"""
-        {azul("=========================================")}
+        {color("=========================================")}
                     {titulo}             
-        {azul("=========================================")}
+        {color("=========================================")}
            1. ⚓ Iniciar una nueva partida
            2. 🌊 Continuar una partida guardada
            3. 🚪 Salir
-        {azul("=========================================")}
+        {color("=========================================")}
         """
 
 
@@ -113,7 +113,7 @@ def pedir_opcion() -> int:
     """
     opcion = None
     while not opcion:
-        opcion = input(azul("Yaaarrr? >> "))
+        opcion = input(color("Yaaarrr? >> "))
         if opcion not in opciones:
             print("Opción no válida")
             opcion = None
@@ -212,17 +212,18 @@ def mostrar_tablero(tablero):
 
     parte_arriba += "\n"
 
-    separador_lineas = "-" * (len(tablero[0]) * 3) + "--"
+    separador_top = "╔" + ("═" * (len(tablero[0]) * 3)) + "╗"
+    separador_bot = "╚" + ("═" * (len(tablero[0]) * 3)) + "╝"
 
     i = 1
 
     tablero_completo = ""
 
     for fila in tablero:
-        tablero_completo += f"\n{azul("|", 39)} {'  '.join(map(str, fila))} {azul("|", 39)} {i}" + f""
+        tablero_completo += f"\n{color('║')} {'  '.join(map(str, fila))} {color('║')} {i}" + f""
         i += 1
     
-    tablero_completo = parte_arriba + azul(separador_lineas, 39) + tablero_completo + "\n" + azul(separador_lineas, 39)
+    tablero_completo = parte_arriba + color(separador_top) + tablero_completo + "\n" + color(separador_bot)
     return tablero_completo
 
 
@@ -366,9 +367,9 @@ def main():
     opcion = pedir_opcion()
     match opcion:
         case 1:
-            nombre_j1 = input(azul("Nombre J1 >> "))
-            nombre_j2 = input(azul("Nombre J2 >> "))
-            nombre_partida = input(azul("Introduce el nombre de la partida >> "))
+            nombre_j1 = input(color("Nombre J1 >> "))
+            nombre_j2 = input(color("Nombre J2 >> "))
+            nombre_partida = input(color("Introduce el nombre de la partida >> "))
             crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, nombre_j1, nombre_j2)
             print("Comenzando partida")
             time.sleep(2)
@@ -384,11 +385,9 @@ def main():
             print(mostrar_tablero(tablero1))
             input(f"\nJUGADOR: {nombre_j1}\nColoca tu Barquita de la Caseria >> ")
         case 2:
-            nombre_partida = input(azul("Introduce el nombre de la partida >> "))
+            nombre_partida = input(color("Introduce el nombre de la partida >> "))
         case 3:
             exit
-    
-        
 
 
 if __name__ == "__main__":
