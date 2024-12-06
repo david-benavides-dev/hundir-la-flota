@@ -21,6 +21,7 @@ def color(texto: str, intensidad: int = 39):
     "Recibe un texto y un número y retorna el texto con un color ANSI apropiado dependiendo del parámetro dado."
     return f"\033[38;5;{intensidad}m{texto}\033[0m"
 
+
 def crear_tablero(dimension = 10):
     tablero = []
     for i in range(dimension):
@@ -28,6 +29,7 @@ def crear_tablero(dimension = 10):
         for _ in range(dimension):
             tablero[i].append("~")
     return tablero
+
 
 def mostrar_tablero(tablero):
     """
@@ -57,6 +59,7 @@ def mostrar_tablero(tablero):
     tablero_completo = parte_arriba + color(separador_top) + tablero_completo + "\n" + color(separador_bot)
     return tablero_completo
 
+
 config_barcos = {
         "Portafritura": {
             "tamano": 5, "numero": 1},
@@ -65,31 +68,6 @@ config_barcos = {
         "Barquita de la Caseria": {
             "tamano": 1, "numero": 3}
     }
-# Genera la flota de barcos.
-def generar_flota(config_barcos: dict) -> dict:
-    """
-    
-    """
-    barcos = {}
-
-    for nombre, datos in config_barcos.items():
-        for i in range(1, datos["numero"] + 1):
-            barco_nombre = f"{nombre}{i}"
-
-            estado = {}
-            for j in range(datos["tamano"]):
-                estado[f"[{j+1}]"] = " "
-
-            coordenadas = []
-            for _ in range(datos["tamano"]):
-                coordenadas.append([])
-
-            barcos[barco_nombre] = {
-                "coordenadas": coordenadas,
-                "estado": estado
-            }
-
-    return barcos
 
 
 def pedir_coordenadas(msj: str) -> tuple:
@@ -116,6 +94,8 @@ def validar_num(num:str) -> bool:
         return False
 
 
+# TODO Barcos horizontal y vertical, aunque no lo pide el README
+# BUG No debería dejar colocar un barco si es mas grande que coordenadas (EJ barco de 5 en 9,9)
 def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple]) -> bool:
     """
     Coloca un barco en el tablero si las coordenadas son válidas.
@@ -144,11 +124,8 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple]) -> bool:
         return False
 
 
-Barquita_de_la_Caseria = {
-            "tamano": 1, "numero": 3}
-
-
-def crear_configuracion_jugador(barcos: dict, num_jugador: int, nombre_jugador: str, nombre_partida: str):
+# TODO Añadir el estado del barco a la config junto a las coordenadas.
+def crear_configuracion_jugador(barcos: dict, nombre_jugador: str):
     """
     
     """
