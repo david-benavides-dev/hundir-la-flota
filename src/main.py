@@ -101,7 +101,7 @@ def mostrar_menu() -> str:
                     {titulo}             
         {color("=========================================")}
            1. ⚓ Iniciar una nueva partida
-           2. 🌊 Continuar una partida guardada
+           2. 🌊 Unirse a una partida
            3. 🚪 Salir
         {color("=========================================")}
         """
