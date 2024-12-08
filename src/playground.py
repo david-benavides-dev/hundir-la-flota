@@ -60,16 +60,6 @@ def mostrar_tablero(tablero):
     return tablero_completo
 
 
-config_barcos = {
-        "Portafritura": {
-            "tamano": 5, "numero": 1},
-        "Gamba de Oro": {
-            "tamano": 2, "numero": 2},
-        "Barquita de la Caseria": {
-            "tamano": 1, "numero": 3}
-    }
-
-
 def pedir_coordenadas(msj: str) -> tuple:
     """
     """
