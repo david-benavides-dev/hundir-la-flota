@@ -30,18 +30,6 @@ config_barcos = {
     }
 
 
-# 1. Se crea una carpeta en x directorio llamada partidas_hundirflota. EJ:
-#     C:\Usuarios\User\AppData\Local\partidas_hundirflota
-#         - Dentro de la misma se crearán subcarpetas con los nombres de las partidas en cuestion y los archivos de configuración default. EJ:
-#             C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1
-#                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1\config.json
-#                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1\j1.json
-#                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1\j2.json
-# 2. Al inicializar el programa, se muestra un menu para seleccionar si quieres crear una partida o continuar una ya empezada (para el caso del 2º player por ej).
-# TODO 3. Si se selecciona Iniciar nueva partida, se pedira nombre de la partida y se verificará que la partida no existe, en el caso de ya existir, se pedirá si quiere empezar de 0 o continuarla.
-#   - Caso de no existir, se creará una carpeta con el nombre de la partida mas toda la configuración inicial, tanto base como J1 y J2.
-
-
 def pausa() -> None:
     """
     Pausa el programa hasta que el usuario presione una tecla.
@@ -95,7 +83,6 @@ def mostrar_menu() -> str:
         color("S", 27)
     )
 
-    # TODO Quizá opcion 4 para ver configuracion inicial, creditos u otros.
     return f"""
         {color("=========================================")}
                     {titulo}             
@@ -131,41 +118,98 @@ def crear_carpeta_inicial(carpeta_root: str) -> None:
     return None
 
 
-# Genera la flota de barcos.
-def generar_flota(config_barcos: dict) -> dict:
+# TODO Barcos horizontal y vertical, aunque no lo pide el README
+# BUG No debería dejar colocar un barco si es mas grande que coordenadas (EJ barco de 5 en 9,9)
+def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_barco: str) -> dict:
+    """
+    Coloca un barco en el tablero si las coordenadas son válidas.
+    
+    Args:
+        tablero (list): Tablero del jugador.
+        barco (dict): Diccionario que representa el barco.
+        coordenadas (list[tuple]): Lista de coordenadas donde colocar el barco.
+    
+    Returns:
+        dict: Diccionario con las coordenadas y estado del barco, o un diccionario vacío si hubo un error.
+    """
+    x, y = coordenadas
+    estado_barco = {}
+
+    try:
+        for i in range(barco['tamano']):
+            if tablero[y-1][x+i-1] != "~":
+                raise Exception("*ERROR* No puedes colocar el barco ahí")
+            tablero[y-1][x+i-1] = "B"
+            estado_barco[f"[{y-1}, {x+i-1}]"] = "B"
+
+        return estado_barco
+    except IndexError:
+        print("*ERROR* No puedes colocar el barco ahí")
+        return {}
+    except Exception as e:
+        print(e)
+        return {}
+
+
+def pedir_coordenadas(msj: str) -> tuple:
+    """
+    """
+    validar_coordenadas = False
+    while not validar_coordenadas:
+        try:
+            x, y = input(msj).split(",")
+            if validar_num(x) and validar_num(y):
+                # Limpia directamente los espacios en el caso de que un usuario los introduzca en el input al pasarlos a int.
+                return [int(x), int(y)]
+        except ValueError:
+            print("*ERROR*")
+            validar_coordenadas = False
+
+
+def validar_num(num:str) -> bool:
+    try:
+        int(num)
+        return True
+    except ValueError:
+        print("*ERROR* Debes introducir números")
+        return False
+
+
+def crear_configuracion_jugador(barcos: dict, nombre_jugador: str):
     """
     
     """
-    barcos = {}
+    tablero = crear_tablero(config_default["dimensiones_tablero"])
 
-    for nombre, datos in config_barcos.items():
-        for i in range(1, datos["numero"] + 1):
-            barco_nombre = f"{nombre}{i}"
+    flota = {}
 
-            estado = {}
-            for j in range(datos["tamano"]):
-                estado[f"[{j+1}]"] = " "
+    for nombre, datos in barcos.items():
+        i = 0
+        while i < datos["numero"]:
+            coordenadas = pedir_coordenadas(f"Introduce coordenadas para '{nombre}' ({i+1}/{datos['numero']}) >> ")
+            estado_barco = colocar_barco(tablero, datos, coordenadas, f"{nombre}{i+1}")
+            if estado_barco:
+                flota[f"{nombre}{i+1}"] = {
+                    "coordenadas": [coordenadas],
+                    "estado": estado_barco
+                }
+                print(flota)
+                print(mostrar_tablero(tablero))
+                i += 1
 
-            coordenadas = []
-            for _ in range(datos["tamano"]):
-                coordenadas.append([])
+    config_jugador = {"nombre": nombre_jugador,
+                          "tablero": tablero,
+                          "barcos": flota,
+                          "movimientos": [{}],
+                          }
 
-            barcos[barco_nombre] = {
-                "coordenadas": coordenadas,
-                "estado": estado
-            }
-
-    return barcos
+    return config_jugador
 
 
-def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre_partida: str, nombrej1: str, nombrej2: str) -> None:
+def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre_partida: str, config_barcos: dict, nombre_jugador:str) -> None:
     """
     
     """
-    if nombrej1 and nombrej2 != "":
-        nombres = nombrej1, nombrej2
-    else:
-        nombres = "Jugador1", "Jugador2"
 
     # Modifica la configuración por defecto con el nombre que queramos darle a la partida
     if nombre_partida != "":
@@ -182,20 +226,11 @@ def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre
         json.dump(datos_iniciales, archivo, indent = 4)
         print("Archivo de configuración creado con éxito")
 
-    tablero = crear_tablero(config_default['dimensiones_tablero'])
-    flota = generar_flota(config_barcos)
+    config_jugador = crear_configuracion_jugador(config_barcos, nombre_jugador)
 
-    # Genera el archivo de configuracion de cada jugador
-    for i in range(1, 2+1):
-        config_jugador = {"nombre": nombres[i-1],
-                          "tablero": tablero,
-                          "movimientos": [{}],
-                          "barcos": flota
-                          }
-
-        with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.{nombres[i-1]}.j{i}.json", "w") as archivo:
-            json.dump(config_jugador, archivo, indent = 2)
-            print(f"Archivo de jugador{i} creado con éxito.")
+    with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.{nombre_jugador}.j{1}.json", "w") as archivo:
+        json.dump(config_jugador, archivo, indent = 4)
+        print(f"Archivo de jugador {1} creado con éxito.")
     
 
 def mostrar_tablero(tablero):
@@ -241,122 +276,6 @@ def crear_tablero(dimension: int) -> list:
     return tablero
 
 
-def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple]) -> bool:
-    """
-    Coloca un barco en el tablero si las coordenadas son válidas.
-    
-    Args:
-        tablero (list): Tablero del jugador.
-        barco (dict): Diccionario que representa el barco.
-        coordenadas (list[tuple]): Lista de coordenadas donde colocar el barco.
-    
-    Returns:
-        bool: True si el barco se colocó correctamente, False si hubo un error.
-    """
-
-
-def leer_archivo_jugador(carpeta: str, nombre_partida: str, jugador: str) -> dict:
-    """
-    Lee el archivo JSON de un jugador específico.
-    
-    Args:
-        carpeta (str): Ruta a la carpeta donde se encuentra el archivo de la partida.
-        nombre_partida (str): Nombre de la partida.
-        jugador (str): Identificador del jugador ("j1" o "j2").
-    
-    Returns:
-        dict: Contenido del archivo del jugador en forma de diccionario.
-    """
-
-
-def guardar_archivo_global(carpeta: str, nombre_partida: str, datos: dict) -> None:
-    """
-    Guarda los cambios en el archivo global de configuración de la partida.
-    
-    Args:
-        carpeta (str): Ruta a la carpeta donde se encuentra el archivo de la partida.
-        nombre_partida (str): Nombre de la partida.
-        datos (dict): Contenido actualizado del archivo global.
-    
-    Returns:
-        None
-    """
-
-
-def guardar_archivo_jugador(carpeta: str, nombre_partida: str, jugador: str, datos: dict) -> None:
-    """
-    Guarda los cambios en el archivo JSON de un jugador.
-    
-    Args:
-        carpeta (str): Ruta a la carpeta donde se encuentra el archivo de la partida.
-        nombre_partida (str): Nombre de la partida.
-        jugador (str): Identificador del jugador ("j1" o "j2").
-        datos (dict): Contenido actualizado del archivo del jugador.
-    
-    Returns:
-        None
-    """
-
-
-def leer_archivo_global(carpeta: str, nombre_partida: str) -> dict:
-    """
-    Lee el archivo global de configuración de la partida.
-    
-    Args:
-        carpeta (str): Ruta a la carpeta donde se encuentra el archivo de la partida.
-        nombre_partida (str): Nombre de la partida.
-    
-    Returns:
-        dict: Contenido del archivo global en forma de diccionario.
-    """
-
-
-def pedir_numero(msj):
-    """
-    
-    """
-    num = False
-    while not num:
-        num = input(msj)
-        if validar_numero(num):
-            return int(num)
-        else:
-            num = False
-
-
-def validar_numero(num: str) -> bool:
-    """
-    
-    """
-    try:
-        int(num)
-        return True
-    except ValueError:
-        print("*ERROR* El número no es válido.")
-        return False
-
-
-def pedir_nombres():
-    """
-    
-    """
-    pass
-
-
-def comenzar_partida():
-    """
-    
-    """
-    pass
-
-
-def jugar():
-    """
-    
-    """
-    pass
-
-
 def main():
     crear_carpeta_inicial(carpetas_ficheros)
 
@@ -368,22 +287,20 @@ def main():
     match opcion:
         case 1:
             nombre_j1 = input(color("Nombre J1 >> "))
-            nombre_j2 = input(color("Nombre J2 >> "))
             nombre_partida = input(color("Introduce el nombre de la partida >> "))
-            crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, nombre_j1, nombre_j2)
+            crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j1)
             print("Comenzando partida")
-            time.sleep(2)
-            limpiar_terminal()
-            print("Limpiando los barquitos")
-            time.sleep(2)
-            print("Preparando las gambitas...")
-            time.sleep(1)
-            print("Echándole pienso a la criatura...")
-            time.sleep(2)
+            # time.sleep(2)
+            # limpiar_terminal()
+            # print("Limpiando los barquitos")
+            # time.sleep(2)
+            # print("Preparando las gambitas...")
+            # time.sleep(1)
+            # print("Echándole pienso a la criatura...")
+            # time.sleep(2)
             limpiar_terminal()
             tablero1 = crear_tablero(10)
             print(mostrar_tablero(tablero1))
-            input(f"\nJUGADOR: {nombre_j1}\nColoca tu Barquita de la Caseria >> ")
         case 2:
             nombre_partida = input(color("Introduce el nombre de la partida >> "))
         case 3:
