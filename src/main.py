@@ -138,11 +138,11 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_b
 
     try:
         for i in range(barco['tamano']):
-            if tablero[y-1][x+i-1] != "~":
+            if tablero[y][x+i] != "~":
                 raise Exception("*ERROR* No puedes colocar un barco ahí.")
-            tablero[y-1][x+i-1] = "B"
-            estado_barco[f"[{y-1}, {x+i-1}]"] = "B"
-            coordenadas_barco.append([y-1, x+i-1])
+            tablero[y][x+i] = "B"
+            estado_barco[f"[{y}, {x+i}]"] = "B"
+            coordenadas_barco.append([y, x+i])
 
         return estado_barco, coordenadas_barco
     except IndexError:
@@ -153,7 +153,7 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_b
         return {}, []
 
 
-def pedir_coordenadas(msj: str, dimensiones: int) -> tuple:
+def pedir_coordenadas(msj: str, dimensiones: int) -> list:
     """
 
     """
@@ -162,10 +162,17 @@ def pedir_coordenadas(msj: str, dimensiones: int) -> tuple:
         try:
             y, x = input(msj).split(",")
             if validar_num(y) and validar_num(x):
+                y = int(y) - 1
+                x = int(x) - 1
+                if not (0 <= y < dimensiones and 0 <= x < dimensiones):
+                    raise Exception("*ERROR* Números no válidos.")
                 # Limpia directamente los espacios en el caso de que un usuario los introduzca en el input al pasarlos a int.
-                return [int(y), int(x)]
+                return [y, x]
         except ValueError:
             print("*ERROR* Coordenadas no válidas. El input debe ser 'N,N' (con comilla).")
+            validar_coordenadas = False
+        except Exception as e:
+            print(e)
             validar_coordenadas = False
 
 
