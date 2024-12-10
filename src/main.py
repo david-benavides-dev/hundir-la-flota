@@ -159,6 +159,7 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_b
         for i in range(barco['tamano']):
             if tablero[y][x+i] != "~":
                 raise Exception("*ERROR* No puedes colocar un barco ahí.")
+        for i in range(barco['tamano']):
             tablero[y][x+i] = "B"
             estado_barco[f"[{y}, {x+i}]"] = "B"
             coordenadas_barco.append([y, x+i])
@@ -166,10 +167,14 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_b
         return estado_barco, coordenadas_barco
     except IndexError:
         print("*ERROR* No puedes colocar el barco ahí")
-        return {}, []
+        time.sleep(2)
+        limpiar_terminal()
+        return False, False
     except Exception as e:
         print(e)
-        return {}, []
+        time.sleep(2)
+        limpiar_terminal()
+        return False, False
 
 
 def pedir_coordenadas(msj: str, dimensiones: int) -> list:
@@ -236,20 +241,19 @@ def crear_configuracion_jugador(barcos: dict, nombre_jugador: str) -> dict:
     flota = {}
 
     limpiar_terminal()
-    print(mostrar_tablero(tablero))
 
     for nombre, datos in barcos.items():
         i = 0
         while i < datos["numero"]:
+            print(mostrar_tablero(tablero))
             coordenadas = pedir_coordenadas(f"Introduce coordenadas para colocar '{nombre}' ({i+1}/{datos['numero']}) >> ", 10)
             estado_barco, coordenadas_barco = colocar_barco(tablero, datos, coordenadas, f"{nombre}{i+1}")
-            if estado_barco:
+            if estado_barco and coordenadas_barco:
                 flota[f"{nombre}{i+1}"] = {
                     "coordenadas": coordenadas_barco,
                     "estado": estado_barco
                 }
                 limpiar_terminal()
-                print(mostrar_tablero(tablero))
                 i += 1
 
     config_jugador = {"nombre": nombre_jugador,
@@ -257,7 +261,7 @@ def crear_configuracion_jugador(barcos: dict, nombre_jugador: str) -> dict:
                           "barcos": flota,
                           "movimientos": [{}],
                           }
-
+    print(mostrar_tablero(tablero))
     return config_jugador
 
 
@@ -294,41 +298,6 @@ def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre
         print(f"Archivo de jugador {1} creado con éxito.")
     
     return None
-    
-
-def mostrar_tablero(tablero: list) -> str:
-    """
-    Genera y devuelve una representación visual del tablero en formato string.
-
-    Args:
-        tablero (list): Matriz que representa el tablero.
-
-    Returns:
-        str: Tablero formateado como una cadena de texto.
-    """
-    # indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    i = 1
-
-    parte_arriba = "\n "
-    for fila in tablero:
-        parte_arriba += f" {i} "
-        i += 1
-
-    parte_arriba += "\n"
-
-    separador_top = "╔" + ("═" * (len(tablero[0]) * 3)) + "╗"
-    separador_bot = "╚" + ("═" * (len(tablero[0]) * 3)) + "╝"
-
-    i = 1
-
-    tablero_completo = ""
-
-    for fila in tablero:
-        tablero_completo += f"\n{color('║')} {'  '.join(map(str, fila))} {color('║')} {i}" + f""
-        i += 1
-    
-    tablero_completo = parte_arriba + color(separador_top) + tablero_completo + "\n" + color(separador_bot)
-    return tablero_completo
 
 
 def crear_tablero(dimension: int) -> list[list]:
@@ -351,6 +320,80 @@ def crear_tablero(dimension: int) -> list[list]:
     return tablero
 
 
+def mostrar_tablero(tablero: list) -> str:
+    """
+    Genera y devuelve una representación visual del tablero en formato string.
+
+    Args:
+        tablero (list): Matriz que representa el tablero.
+
+    Returns:
+        str: Tablero formateado como una cadena de texto.
+    """
+    # indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    i = 1
+
+    parte_abajo = "\n    "
+    for fila in tablero:
+        parte_abajo += f" {i} "
+        i += 1
+
+    parte_abajo += " " + "\n"
+
+    separador_top = "   ╔" + ("═" * (len(tablero[0]) * 3)) + "╗"
+    separador_bot = "   ╚" + ("═" * (len(tablero[0]) * 3)) + "╝"
+
+    i = 1
+
+    tablero_completo = ""
+
+    for fila in tablero:
+        if i < 10:
+            tablero_completo += f"\n {i} {color('║')} {'  '.join(map(str, fila))} {color('║')}" + f""
+        else:
+            tablero_completo += f"\n{i} {color('║')} {'  '.join(map(str, fila))} {color('║')}" + f""
+        i += 1
+    
+    tablero_completo = color(separador_top) + tablero_completo + "\n" + color(separador_bot) + parte_abajo
+    return tablero_completo
+
+
+def cargar_json(ruta_archivo: str, max_reintentos: int = 4, pausa_ms: int = 150) -> dict | None:
+    """
+    Carga un archivo JSON en un diccionario con reintentos en caso de error por bloqueo (OSError e IOError).
+
+    Args:
+        ruta_archivo (str): Ruta al archivo JSON.
+        max_reintentos (int): Número máximo de intentos permitidos.
+        pausa_ms (int): Tiempo de pausa entre intentos en milisegundos.
+
+    Returns:
+        dict | None: Diccionario con los datos del archivo JSON o None si no es posible cargarlo.
+    """
+    try:
+        intentos = 0
+        while intentos < max_reintentos:
+            try:
+                with open(ruta_archivo, 'r', encoding='utf-8') as archivo:
+                    return json.load(archivo)
+            except (OSError, IOError):
+                intentos += 1
+                time.sleep(pausa_ms / 1000)
+        return None
+    except Exception:
+        return None
+
+
+def comprobar_partida(carpeta_root: str, nombre_partida: str) -> bool:
+    """
+    
+    """ 
+    if not os.path.exists(f"{carpeta_root}/{nombre_partida}"):
+        return False
+    else:
+        return True
+
+
 def main():
     crear_carpeta_inicial(carpetas_ficheros)
 
@@ -364,10 +407,15 @@ def main():
             nombre_j1 = input(color("Nombre J1 >> "))
             nombre_partida = input(color("Introduce el nombre de la partida >> "))
             crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j1)
-            print("Comenzando partida")
+            print("Comenzando partida...")
             time.sleep(2)
         case 2:
-            nombre_partida = input(color("Introduce el nombre de la partida >> "))
+            validar_partida = False
+            while not validar_partida:
+                nombre_partida = input(color("Introduce el nombre de la partida >> "))
+                validar_partida = comprobar_partida(carpetas_ficheros, nombre_partida)
+                if not validar_partida:
+                    print("*ERROR* La partida no existe.")
         case 3:
             exit()
 
