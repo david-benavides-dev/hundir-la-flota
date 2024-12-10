@@ -118,9 +118,9 @@ def crear_carpeta_inicial(carpeta_root: str) -> None:
     return None
 
 
-# TODO Barcos horizontal y vertical, aunque no lo pide el README
+# TODO Permitir barcos tanto en horizontal como vertical.
 # BUG No debería dejar colocar un barco si es mas grande que coordenadas (EJ barco de 5 en 9,9)
-def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_barco: str) -> dict:
+def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_barco: str) -> tuple[dict, list]:
     """
     Coloca un barco en el tablero si las coordenadas son válidas.
     
@@ -130,39 +130,42 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_b
         coordenadas (list[tuple]): Lista de coordenadas donde colocar el barco.
     
     Returns:
-        dict: Diccionario con las coordenadas y estado del barco, o un diccionario vacío si hubo un error.
+        dict, list: Diccionario con las coordenadas y lista con el estado del barco, o un diccionario y lista vacías si algún un error.
     """
-    x, y = coordenadas
+    y, x = coordenadas
     estado_barco = {}
+    coordenadas_barco = []
 
     try:
         for i in range(barco['tamano']):
             if tablero[y-1][x+i-1] != "~":
-                raise Exception("*ERROR* No puedes colocar el barco ahí")
+                raise Exception("*ERROR* No puedes colocar un barco ahí.")
             tablero[y-1][x+i-1] = "B"
             estado_barco[f"[{y-1}, {x+i-1}]"] = "B"
+            coordenadas_barco.append([y-1, x+i-1])
 
-        return estado_barco
+        return estado_barco, coordenadas_barco
     except IndexError:
         print("*ERROR* No puedes colocar el barco ahí")
-        return {}
+        return {}, []
     except Exception as e:
         print(e)
-        return {}
+        return {}, []
 
 
-def pedir_coordenadas(msj: str) -> tuple:
+def pedir_coordenadas(msj: str, dimensiones: int) -> tuple:
     """
+
     """
     validar_coordenadas = False
     while not validar_coordenadas:
         try:
-            x, y = input(msj).split(",")
-            if validar_num(x) and validar_num(y):
+            y, x = input(msj).split(",")
+            if validar_num(y) and validar_num(x):
                 # Limpia directamente los espacios en el caso de que un usuario los introduzca en el input al pasarlos a int.
-                return [int(x), int(y)]
+                return [int(y), int(x)]
         except ValueError:
-            print("*ERROR*")
+            print("*ERROR* Coordenadas no válidas. El input debe ser 'N,N' (con comilla).")
             validar_coordenadas = False
 
 
@@ -183,17 +186,20 @@ def crear_configuracion_jugador(barcos: dict, nombre_jugador: str):
 
     flota = {}
 
+    limpiar_terminal()
+    print(mostrar_tablero(tablero))
+
     for nombre, datos in barcos.items():
         i = 0
         while i < datos["numero"]:
-            coordenadas = pedir_coordenadas(f"Introduce coordenadas para '{nombre}' ({i+1}/{datos['numero']}) >> ")
-            estado_barco = colocar_barco(tablero, datos, coordenadas, f"{nombre}{i+1}")
+            coordenadas = pedir_coordenadas(f"Introduce coordenadas para colocar '{nombre}' ({i+1}/{datos['numero']}) >> ", 10)
+            estado_barco, coordenadas_barco = colocar_barco(tablero, datos, coordenadas, f"{nombre}{i+1}")
             if estado_barco:
                 flota[f"{nombre}{i+1}"] = {
-                    "coordenadas": [coordenadas],
+                    "coordenadas": coordenadas_barco,
                     "estado": estado_barco
                 }
-                print(flota)
+                limpiar_terminal()
                 print(mostrar_tablero(tablero))
                 i += 1
 
@@ -237,12 +243,12 @@ def mostrar_tablero(tablero):
     """
     
     """
-    indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    i = 0
+    # indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    i = 1
 
     parte_arriba = "\n "
     for fila in tablero:
-        parte_arriba += f" {indice_letras[i]} "
+        parte_arriba += f" {i} "
         i += 1
 
     parte_arriba += "\n"
@@ -299,8 +305,6 @@ def main():
             # print("Echándole pienso a la criatura...")
             # time.sleep(2)
             limpiar_terminal()
-            tablero1 = crear_tablero(10)
-            print(mostrar_tablero(tablero1))
         case 2:
             nombre_partida = input(color("Introduce el nombre de la partida >> "))
         case 3:
