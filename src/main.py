@@ -53,15 +53,26 @@ def limpiar_terminal() -> None:
     return None
 
 
-# Funcion para colores
-def color(texto: str, intensidad: int = 39):
-    "Recibe un texto y un número y retorna el texto con un color ANSI apropiado dependiendo del parámetro dado."
-    return f"\033[38;5;{intensidad}m{texto}\033[0m"
+def color(texto: str, color: int = 39):
+    """
+    Aplica un color ANSI al texto proporcionado, basado en el número de color especificado por parámetro.
+
+    Args:
+        texto (str): El texto al que se le aplicará el color.
+        color (int): Un número entero que representa el color ANSI. Por defecto es 39 (azul).
+
+    Returns:
+        str: El texto con el color aplicado en formato ANSI.
+    """
+    return f"\033[38;5;{color}m{texto}\033[0m"
 
 
 def mostrar_menu() -> str:
     """
-    Muestra el menu inicial.
+    Genera y devuelve el menú principal con colores y las opciones del juego.
+
+    Returns:
+        str: El menú principal como un string con formato ANSI.
     """
     titulo = (
         color("P", 27) +
@@ -96,7 +107,10 @@ def mostrar_menu() -> str:
 
 def pedir_opcion() -> int:
     """
-    Pedir opcion porrillero edition por ahora, just testing.
+    Solicita al usuario una opción válida entre las disponibles (1, 2, 3).
+
+    Returns:
+        int: La opción seleccionada.
     """
     opcion = None
     while not opcion:
@@ -104,12 +118,16 @@ def pedir_opcion() -> int:
         if opcion not in opciones:
             print("Opción no válida")
             opcion = None
+
     return int(opcion)
 
 
 def crear_carpeta_inicial(carpeta_root: str) -> None:
     """
-    Crea la carpeta inicial donde se guardarán las partidas del juego.
+    Crea la carpeta raíz para guardar partidas si no existe.
+    
+    Args:
+        carpeta_root (str): Ruta de la carpeta a crear.
     """
     if not os.path.exists(carpeta_root):
         os.mkdir(carpeta_root)
@@ -125,12 +143,13 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_b
     Coloca un barco en el tablero si las coordenadas son válidas.
     
     Args:
-        tablero (list): Tablero del jugador.
+        tablero (list[list]): Tablero del jugador.
         barco (dict): Diccionario que representa el barco.
         coordenadas (list[tuple]): Lista de coordenadas donde colocar el barco.
+        nombre_barco (str): Nombre del barco que se está colocando.
     
     Returns:
-        dict, list: Diccionario con las coordenadas y lista con el estado del barco, o un diccionario y lista vacías si algún un error.
+        dict, list: Diccionario con las coordenadas y lista con el estado del barco, o un diccionario y lista vacías si hay algún un error.
     """
     y, x = coordenadas
     estado_barco = {}
@@ -155,7 +174,14 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_b
 
 def pedir_coordenadas(msj: str, dimensiones: int) -> list:
     """
+    Solicita coordenadas válidas para el tablero.
 
+    Args:
+        msj (str): Mensaje a mostrar al usuario.
+        dimensiones (int): Tamaño máximo permitido para las coordenadas.
+
+    Returns:
+        list: Coordenadas [y, x] válidas para el tablero.
     """
     validar_coordenadas = False
     while not validar_coordenadas:
@@ -177,6 +203,15 @@ def pedir_coordenadas(msj: str, dimensiones: int) -> list:
 
 
 def validar_num(num:str) -> bool:
+    """
+    Valida si una cadena de texto puede ser convertida a un número entero.
+
+    Args:
+        num (str): El string que se quiere validar como número.
+
+    Returns:
+        bool: True si es válido, False si no lo es.
+    """
     try:
         int(num)
         return True
@@ -185,9 +220,16 @@ def validar_num(num:str) -> bool:
         return False
 
 
-def crear_configuracion_jugador(barcos: dict, nombre_jugador: str):
+def crear_configuracion_jugador(barcos: dict, nombre_jugador: str) -> dict:
     """
-    
+    Crea la configuración inicial de un jugador.
+
+    Args:
+        barcos (list): Lista de barcos para el jugador.
+        nombre_jugador (str): Nombre del jugador.
+
+    Returns:
+        dict: Configuración del jugador con el tablero y la flota con el estado de cada uno de los barcos.
     """
     tablero = crear_tablero(config_default["dimensiones_tablero"])
 
@@ -221,9 +263,15 @@ def crear_configuracion_jugador(barcos: dict, nombre_jugador: str):
 
 def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre_partida: str, config_barcos: dict, nombre_jugador:str) -> None:
     """
-    
-    """
+    Crea la configuración inicial de la partida y guarda los archivos correspondientes en un JSON.
 
+    Args:
+        carpeta_root (str): Carpeta raíz donde se almacenarán las partidas.
+        datos_iniciales (dict): Configuración default.
+        nombre_partida (str): Nombre de la partida.
+        config_barcos (dict): Configuración de los barcos.
+        nombre_jugador (str): Nombre del jugador.
+    """
     # Modifica la configuración por defecto con el nombre que queramos darle a la partida
     if nombre_partida != "":
         config_default['nombre_partida'] = nombre_partida
@@ -245,10 +293,18 @@ def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre
         json.dump(config_jugador, archivo, indent = 4)
         print(f"Archivo de jugador {1} creado con éxito.")
     
-
-def mostrar_tablero(tablero):
-    """
+    return None
     
+
+def mostrar_tablero(tablero: list) -> str:
+    """
+    Genera y devuelve una representación visual del tablero en formato string.
+
+    Args:
+        tablero (list): Matriz que representa el tablero.
+
+    Returns:
+        str: Tablero formateado como una cadena de texto.
     """
     # indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     i = 1
@@ -275,9 +331,15 @@ def mostrar_tablero(tablero):
     return tablero_completo
 
 
-def crear_tablero(dimension: int) -> list:
+def crear_tablero(dimension: int) -> list[list]:
     """
-    
+    Crea un tablero vacío de tamaño dimension x dimension.
+
+    Args:
+        dimension (int): Tamaño que tendrá el tablero.
+
+    Returns:
+        list[list]: Matriz con celdas inicializadas como "~" (olas).
     """
     tablero = []
 
@@ -303,19 +365,11 @@ def main():
             nombre_partida = input(color("Introduce el nombre de la partida >> "))
             crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j1)
             print("Comenzando partida")
-            # time.sleep(2)
-            # limpiar_terminal()
-            # print("Limpiando los barquitos")
-            # time.sleep(2)
-            # print("Preparando las gambitas...")
-            # time.sleep(1)
-            # print("Echándole pienso a la criatura...")
-            # time.sleep(2)
-            limpiar_terminal()
+            time.sleep(2)
         case 2:
             nombre_partida = input(color("Introduce el nombre de la partida >> "))
         case 3:
-            exit
+            exit()
 
 
 if __name__ == "__main__":
