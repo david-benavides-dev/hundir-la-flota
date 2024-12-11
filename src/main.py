@@ -291,11 +291,6 @@ def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre
         config_barcos (dict): Configuración de los barcos.
         nombre_jugador (str): Nombre del jugador.
     """
-    # Modifica la configuración por defecto con el nombre que queramos darle a la partida.
-    # if nombre_partida == "":
-    #     config_default['nombre_partida'] = "MiPartida"
-    # else:
-    #     config_default['nombre_partida'] = nombre_partida
 
     # Crea la carpeta con el nombre de la partida dentro del root partidas_hundirflota.
     if not os.path.exists(f"{carpeta_root}/{nombre_partida}"):
@@ -338,11 +333,11 @@ def crear_tablero(dimension: int) -> list[list]:
 
 def mostrar_tablero(tablero: list, modo: str = "mostrar") -> str:
     """
-    Genera y devuelve una representación visual del tablero en formato string por consola. Si el modo es "ataque", oculta los barcos intactos.
+    Genera y devuelve una representación visual del tablero en formato string por consola. Si el modo es "ataque", oculta los barcos intactos. Por defecto ("mostrar") muestra todo el tablero.
 
     Args:
         tablero (list): Matriz que representa el tablero.
-        modo (str): Modo de visualización ("ataque" o "estado").
+        modo (str): Modo de visualización ("ataque", "estado" o "mostrar").
 
     Returns:
         str: Tablero formateado como una cadena de texto.
@@ -384,7 +379,7 @@ def mostrar_tablero(tablero: list, modo: str = "mostrar") -> str:
 
     tablero_completo = ""
 
-    for fila in tablero:
+    for fila in tablero_ataque if modo == "ataque" else tablero:
         if i < 10:
             tablero_completo += f"\n {i} {color('║')} {'  '.join(map(str, fila))} {color('║')}" + f""
         else:

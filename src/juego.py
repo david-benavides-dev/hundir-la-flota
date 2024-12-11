@@ -1,5 +1,5 @@
 import time
-from main import limpiar_terminal, crear_tablero, mostrar_tablero, pedir_coordenadas, color, cargar_json
+from main import limpiar_terminal, mostrar_tablero, pedir_coordenadas, color, cargar_json
 
 """
 JUEGO
@@ -16,21 +16,6 @@ JUEGO
     Guarda el dict
     Guarda dict en json
 """
-
-
-config_default = {
-    "nombre_partida": "",
-    "dimensiones_tablero": 10,
-    "tiempo_refresco": 2,
-    "tiempo_ataque": 30,
-    "configuracion_barcos": {
-        "Portafritura": {"tamano": 5, "numero": 1},
-        "Gamba de Oro": {"tamano": 2, "numero": 2},
-        "Barquita de la Caseria": {"tamano": 1, "numero": 3}
-    },
-    "turnos_jugados": 0,
-    "turno_actual": "j2"
-}
 
 
 def esperar_turno(jugador: str, configuracion_default: dict, carpetas_ficheros: str, nombre_partida: str):
@@ -71,6 +56,7 @@ def jugar(configuracion_j1: dict, configuracion_j2: dict, configuracion_default:
             configuracion_jugador = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
             configuracion_enemigo = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{jugador_enemigo}.json")
             configuracion_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
+            limpiar_terminal()
 
         else:
             print(f"Turno de Jugador {configuracion_default['turno_actual'][1]}\n")
@@ -79,11 +65,6 @@ def jugar(configuracion_j1: dict, configuracion_j2: dict, configuracion_default:
             configuracion_jugador = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
             configuracion_enemigo = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{jugador_enemigo}.json")
             configuracion_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
+            limpiar_terminal()
 
     print("Partida finalizada")
-
-
-# limpiar_terminal()
-# jugar(1,1,config_default,"j1")
-# time.sleep(2)
-# limpiar_terminal()
