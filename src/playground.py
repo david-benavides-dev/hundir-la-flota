@@ -1,5 +1,5 @@
 """
-Posible flujo:
+FLUJO
 
 CREAR PARTIDA
     Pide nombre de la partida
@@ -12,18 +12,17 @@ CREAR PARTIDA
 
 UNIRSE A PARTIDA
     Pide nombre de la partida
-        Valida hasta que la carpeta exista
         Valida que exista archivo J1
     Pide nombre del jugador
         Pide al J2 que ponga los barcos en su tablero
         Genera el archivo de J2
     Valida que exista J1 y J2
+    Espera a que J2 haga el primer movimiento y cambie el archivo config a J2
 
 JUEGO
     Carga json
     Lee dict
-    jugador1 hace x
-    jugador2 espera
+    jugador1 hace x mientras jugador2 espera
     Guarda el dict
     Guarda dict en json
 

@@ -1,9 +1,22 @@
+# TODO Empezar y finalizar lógica para jugar la partida.
+# TODO Añadir sonidos.
+# TODO Refactorizar.
+# TODO dividir código en varios archivos para legibilidad.
+# TODO nomenclatura funciones/variables.
+# TODO comentarios.
+# TODO permitir orientación de barco H V y + o -.
+# TODO cambiar mostrar_tablero y menu a un print.
+# TODO utilizar config_default para los barcos en vez de dos diccionarios diferentes.
+# TODO MAYBE hacer que config_default sea un json y cargarlo para crear la configuracion por defecto + los barcos.
+
+from juego import *
 import os
 import time
 import json
 
 opciones = "1","2","3"
-# TODO cambiar a carpeta para MP maybe permitir al usuario selccionar carpeta (doubt)
+# TODO cambiar a carpeta para MP maybe permitir al usuario selccionar carpeta (doubt).
+# TODO cambiar ruta por una con 'r'.
 carpetas_ficheros = 'src/partidas_hundirflota'
 
 config_default = {
@@ -137,7 +150,7 @@ def crear_carpeta_inicial(carpeta_root: str) -> None:
 
 
 # TODO Permitir barcos tanto en horizontal como vertical.
-# BUG No debería dejar colocar un barco si es mas grande que coordenadas (EJ barco de 5 en 9,9)
+# BUG No debería dejar colocar un barco si es mas grande que coordenadas (EJ barco de 5 en 9,9) <- fixed
 def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_barco: str) -> tuple[dict, list]:
     """
     Coloca un barco en el tablero si las coordenadas son válidas.
@@ -200,7 +213,7 @@ def pedir_coordenadas(msj: str, dimensiones: int) -> list:
                 # Limpia directamente los espacios en el caso de que un usuario los introduzca en el input al pasarlos a int.
                 return [y, x]
         except ValueError:
-            print("*ERROR* Coordenadas no válidas. El input debe ser 'N,N' (con comilla).")
+            print("*ERROR* Coordenadas no válidas. El input debe ser 'N,N' (separado con coma).")
             validar_coordenadas = False
         except Exception as e:
             print(e)
@@ -261,7 +274,9 @@ def crear_configuracion_jugador(barcos: dict, nombre_jugador: str) -> dict:
                           "barcos": flota,
                           "movimientos": [{}],
                           }
+
     print(mostrar_tablero(tablero))
+
     return config_jugador
 
 
@@ -276,18 +291,18 @@ def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre
         config_barcos (dict): Configuración de los barcos.
         nombre_jugador (str): Nombre del jugador.
     """
-    # Modifica la configuración por defecto con el nombre que queramos darle a la partida
-    if nombre_partida == "":
-        config_default['nombre_partida'] = nombre_partida
-    else:
-        nombre_partida = config_default['nombre_partida']
+    # Modifica la configuración por defecto con el nombre que queramos darle a la partida.
+    # if nombre_partida == "":
+    #     config_default['nombre_partida'] = "MiPartida"
+    # else:
+    #     config_default['nombre_partida'] = nombre_partida
 
     # Crea la carpeta con el nombre de la partida dentro del root partidas_hundirflota.
     if not os.path.exists(f"{carpeta_root}/{nombre_partida}"):
         os.mkdir(f"{carpeta_root}/{nombre_partida}")
 
     # Genera el archivo de configuracion inicial json con el nombre de la partida dentro de la carpeta con su mismo nombre en root.
-    if not os.path.exists(f"{carpeta_root}/{nombre_partida}"):
+    if os.path.exists(f"{carpeta_root}/{nombre_partida}"):
         with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.json", "w") as archivo:
             json.dump(datos_iniciales, archivo, indent = 4)
             print("Archivo de configuración creado con éxito")
@@ -321,28 +336,49 @@ def crear_tablero(dimension: int) -> list[list]:
     return tablero
 
 
-def mostrar_tablero(tablero: list) -> str:
+def mostrar_tablero(tablero: list, modo: str = "mostrar") -> str:
     """
-    Genera y devuelve una representación visual del tablero en formato string.
+    Genera y devuelve una representación visual del tablero en formato string por consola. Si el modo es "ataque", oculta los barcos intactos.
 
     Args:
         tablero (list): Matriz que representa el tablero.
+        modo (str): Modo de visualización ("ataque" o "estado").
 
     Returns:
         str: Tablero formateado como una cadena de texto.
     """
-    # indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    i = 1
+    # TODO cambiar coordenadas a letras + números maybe.
+    indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-    parte_abajo = "\n    "
+
+    # Condición para ocultar la posición de los barcos a la hora de mostrar el tablero en estado "ataque".
+    # Itera sobre el tablero original, haciendo una réplica del mismo a otro tablero vacío y ocultando las 'B' por '~'.
+    if modo == "ataque":
+        tablero_ataque = []
+        for fila in tablero:
+            fila_ataque = []
+            for celda in fila:
+                if celda == "B":
+                    fila_ataque.append("~")
+                else:
+                    fila_ataque.append(celda)
+            tablero_ataque.append(fila_ataque)
+        titulo = f"{' ' * len(tablero[0])}Tablero de ataque:\n"
+    elif modo == "estado":
+        titulo = f"{' ' * len(tablero[0])}Tablero de estado:\n"
+    else:
+        titulo = ""
+
+    i = 0
+    coordenadas_inferior = "\n    "
     for fila in tablero:
-        parte_abajo += f" {i} "
+        coordenadas_inferior += f" {indice_letras[i]} "
         i += 1
 
-    parte_abajo += " " + "\n"
+    coordenadas_inferior += " " + "\n"
 
-    separador_top = "   ╔" + ("═" * (len(tablero[0]) * 3)) + "╗"
-    separador_bot = "   ╚" + ("═" * (len(tablero[0]) * 3)) + "╝"
+    marco_superior = "   ╔" + ("═" * (len(tablero[0]) * 3)) + "╗"
+    marco_inferior = "   ╚" + ("═" * (len(tablero[0]) * 3)) + "╝"
 
     i = 1
 
@@ -355,7 +391,8 @@ def mostrar_tablero(tablero: list) -> str:
             tablero_completo += f"\n{i} {color('║')} {'  '.join(map(str, fila))} {color('║')}" + f""
         i += 1
     
-    tablero_completo = color(separador_top) + tablero_completo + "\n" + color(separador_bot) + parte_abajo
+    tablero_completo = titulo + color(marco_superior) + tablero_completo + "\n" + color(marco_inferior) + coordenadas_inferior
+
     return tablero_completo
 
 
@@ -394,7 +431,9 @@ def main():
     opcion = pedir_opcion()
 
     match opcion:
+
         case 1:
+
             nombre_j1 = input(color("Nombre J1 >> "))
             numero_jugador = "j1"
             nombre_partida = input(color("Introduce el nombre de la partida >> "))
@@ -402,21 +441,29 @@ def main():
             crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j1, numero_jugador)
             print("Comenzando partida...")
             time.sleep(2)
+            print("Esperando a J2...")
             config_j1 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
+            configuracion_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
 
             validar_partida = False
+
             while not validar_partida:
+                # Meter cargar_json directamente en el if porque retorna None si hay excepcion.
                 config_j2 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.j2.json")
                 if config_j2 is None:
-                    print("Esperando a J2...")
                     time.sleep(3)
                 else:
                     config_j2 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.j2.json")
-                    print(config_j2)
+                    limpiar_terminal()
 
                     validar_partida = True
+
+            jugar(config_j1, config_j2, configuracion_default, numero_jugador, carpetas_ficheros, nombre_partida)
+
         case 2:
+
             validar_partida = False
+
             while not validar_partida:
                 nombre_partida = input(color("Introduce el nombre de la partida >> "))
                 config_j1 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.j1.json")
@@ -428,10 +475,14 @@ def main():
                     config_j1 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
                     crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j2, numero_jugador)
                     config_j2 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
+                    configuracion_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
                     
                     validar_partida = True
+            
+            jugar(config_j1, config_j2, configuracion_default, numero_jugador, carpetas_ficheros, nombre_partida)
 
         case 3:
+
             exit()
 
 
