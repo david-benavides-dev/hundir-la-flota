@@ -7,7 +7,7 @@ opciones = "1","2","3"
 carpetas_ficheros = 'src/partidas_hundirflota'
 
 config_default = {
-    "nombre_partida": "MiPartida",
+    "nombre_partida": "",
     "dimensiones_tablero": 10,
     "tiempo_refresco": 2,
     "tiempo_ataque": 30,
@@ -149,7 +149,7 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_b
         nombre_barco (str): Nombre del barco que se está colocando.
     
     Returns:
-        dict, list: Diccionario con las coordenadas y lista con el estado del barco, o un diccionario y lista vacías si hay algún un error.
+        dict, list | False: Diccionario con las coordenadas y una lista con el estado del barco, o False si hay algún un error.
     """
     y, x = coordenadas
     estado_barco = {}
@@ -207,7 +207,7 @@ def pedir_coordenadas(msj: str, dimensiones: int) -> list:
             validar_coordenadas = False
 
 
-def validar_num(num:str) -> bool:
+def validar_num(num: str) -> bool:
     """
     Valida si una cadena de texto puede ser convertida a un número entero.
 
@@ -265,7 +265,7 @@ def crear_configuracion_jugador(barcos: dict, nombre_jugador: str) -> dict:
     return config_jugador
 
 
-def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre_partida: str, config_barcos: dict, nombre_jugador:str) -> None:
+def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre_partida: str, config_barcos: dict, nombre_jugador: str, numero_jugador: int) -> None:
     """
     Crea la configuración inicial de la partida y guarda los archivos correspondientes en un JSON.
 
@@ -277,7 +277,7 @@ def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre
         nombre_jugador (str): Nombre del jugador.
     """
     # Modifica la configuración por defecto con el nombre que queramos darle a la partida
-    if nombre_partida != "":
+    if nombre_partida == "":
         config_default['nombre_partida'] = nombre_partida
     else:
         nombre_partida = config_default['nombre_partida']
@@ -287,15 +287,16 @@ def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre
         os.mkdir(f"{carpeta_root}/{nombre_partida}")
 
     # Genera el archivo de configuracion inicial json con el nombre de la partida dentro de la carpeta con su mismo nombre en root.
-    with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.json", "w") as archivo:
-        json.dump(datos_iniciales, archivo, indent = 4)
-        print("Archivo de configuración creado con éxito")
+    if not os.path.exists(f"{carpeta_root}/{nombre_partida}"):
+        with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.json", "w") as archivo:
+            json.dump(datos_iniciales, archivo, indent = 4)
+            print("Archivo de configuración creado con éxito")
 
     config_jugador = crear_configuracion_jugador(config_barcos, nombre_jugador)
 
-    with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.{nombre_jugador}.j{1}.json", "w") as archivo:
+    with open(f"{carpeta_root}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json", "w") as archivo:
         json.dump(config_jugador, archivo, indent = 4)
-        print(f"Archivo de jugador {1} creado con éxito.")
+        print(f"Archivo de jugador {numero_jugador} - {nombre_jugador} creado con éxito.")
     
     return None
 
@@ -384,38 +385,52 @@ def cargar_json(ruta_archivo: str, max_reintentos: int = 4, pausa_ms: int = 150)
         return None
 
 
-def comprobar_partida(carpeta_root: str, nombre_partida: str) -> bool:
-    """
-    
-    """ 
-    if not os.path.exists(f"{carpeta_root}/{nombre_partida}"):
-        return False
-    else:
-        return True
-
-
 def main():
-    crear_carpeta_inicial(carpetas_ficheros)
 
     limpiar_terminal()
 
     print(mostrar_menu())
 
     opcion = pedir_opcion()
+
     match opcion:
         case 1:
             nombre_j1 = input(color("Nombre J1 >> "))
+            numero_jugador = "j1"
             nombre_partida = input(color("Introduce el nombre de la partida >> "))
-            crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j1)
+            crear_carpeta_inicial(carpetas_ficheros)
+            crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j1, numero_jugador)
             print("Comenzando partida...")
             time.sleep(2)
+            config_j1 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
+
+            validar_partida = False
+            while not validar_partida:
+                config_j2 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.j2.json")
+                if config_j2 is None:
+                    print("Esperando a J2...")
+                    time.sleep(3)
+                else:
+                    config_j2 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.j2.json")
+                    print(config_j2)
+
+                    validar_partida = True
         case 2:
             validar_partida = False
             while not validar_partida:
                 nombre_partida = input(color("Introduce el nombre de la partida >> "))
-                validar_partida = comprobar_partida(carpetas_ficheros, nombre_partida)
-                if not validar_partida:
+                config_j1 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.j1.json")
+                if config_j1 is None:
                     print("*ERROR* La partida no existe.")
+                else:
+                    nombre_j2 = input((color("Nombre J2 >> ")))
+                    numero_jugador = "j2"
+                    config_j1 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
+                    crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j2, numero_jugador)
+                    config_j2 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
+                    
+                    validar_partida = True
+
         case 3:
             exit()
 
