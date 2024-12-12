@@ -1,3 +1,11 @@
+Secciones lógicas para organizar el código por archivos:
+
+
+config.py
+utils.py
+juego.py
+
+
 """
 FLUJO
 
@@ -43,4 +51,4 @@ JUEGO
 #                 C:\Usuarios\User\AppData\Local\partidas_hundirflota\partida1\j2.json
 # 2. Al inicializar el programa, se muestra un menu para seleccionar si quieres crear una partida o continuar una ya empezada (para el caso del 2º player por ej).
 # TODO 3. Si se selecciona Iniciar nueva partida, se pedira nombre de la partida y se verificará que la partida no existe, en el caso de ya existir, se pedirá si quiere empezar de 0 o continuarla.
-#   - Caso de no existir, se creará una carpeta con el nombre de la partida mas toda la configuración inicial, tanto base como J1 y J2.
+#   - Caso de no existir, se creará una carpeta con el nombre de la partida mas la configuración inicial mas la de J1.

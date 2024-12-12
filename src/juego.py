@@ -18,8 +18,92 @@ JUEGO
 """
 
 
+def registrar_movimiento(movimientos: set, coordenada: tuple, resultado: str) -> None:
+    """
+    Registra un movimiento en el conjunto de movimientos del jugador.
+    
+    Args:
+        movimientos (set): Conjunto de movimientos del jugador.
+        coordenada (tuple): Coordenada del ataque (fila, columna).
+        resultado (str): Resultado del ataque ("A", "T", "H").
+    
+    Returns:
+        None
+    """
+
+
+def verificar_movimiento(movimientos: set, coordenadas: tuple) -> bool:
+    """
+    Verifica si un movimiento ya ha sido realizado en las coordenadas dadas.
+    
+    Args:
+        movimientos (set): Conjunto de movimientos del jugador.
+        coordenadas (tuple): Coordenada a verificar (fila, columna).
+    
+    Returns:
+        bool: True si el movimiento es válido, False si ya ha sido realizado.
+    """
+    return coordenadas not in movimientos
+
+
+def actualizar_tablero(tablero: list, coordenada: tuple, resultado: str) -> None:
+    """
+    Actualiza el tablero con el resultado de un ataque.
+    
+    Args:
+        tablero (list): Tablero del jugador.
+        coordenada (tuple): Coordenada del ataque (fila, columna).
+        resultado (str): Resultado del ataque ("A", "T", "H").
+    
+    Returns:
+        None
+    """
+
+
+def condicion_ganador(config_jugador: dict) -> bool:
+    """
+    Verifica si todos los barcos de un jugador han sido hundidos.
+    
+    Args:
+        jugador (dict): Diccionario con la información del jugador.
+    
+    Returns:
+        bool: True si todos los barcos han sido hundidos, False en caso contrario.
+    """
+
+
+def realizar_ataque(jugador_activo: dict, jugador_pasivo: dict, coordenada: tuple) -> str:
+    """
+    Realiza un ataque del jugador activo al jugador pasivo, registrando el resultado.
+    
+    Args:
+        jugador_activo (dict): Diccionario con la información del jugador activo.
+        jugador_pasivo (dict): Diccionario con la información del jugador pasivo.
+        coordenada (tuple): Coordenada del ataque (fila, columna).
+    
+    Returns:
+        str: Resultado del ataque ("A", "T", "H").
+    """
+
+
+def actualizar_tablero(tablero: list, coordenada: tuple, resultado: str) -> None:
+    """
+    Actualiza el tablero con el resultado de un ataque.
+    
+    Args:
+        tablero (list): Tablero del jugador.
+        coordenada (tuple): Coordenada del ataque (fila, columna).
+        resultado (str): Resultado del ataque ("A", "T", "H").
+    
+    Returns:
+        None
+    """
+
+
 def esperar_turno_ataque(jugador: str, configuracion_default: dict, carpetas_ficheros: str, nombre_partida: str):
-    """Espera hasta que sea el turno del jugador."""
+    """
+    Espera hasta que sea el turno del jugador.
+    """
     print(f"Esperando ataque...")
     while True:
         config_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
@@ -67,6 +151,3 @@ def jugar(configuracion_j1: dict, configuracion_j2: dict, configuracion_default:
             configuracion_enemigo = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{jugador_enemigo}.json")
             configuracion_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
             limpiar_terminal()
-
-
-    print("Partida finalizada")
