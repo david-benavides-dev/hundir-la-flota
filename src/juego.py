@@ -1,22 +1,6 @@
 import time
 from main import limpiar_terminal, mostrar_tablero, pedir_coordenadas, color, cargar_json, guardar_json
 
-"""
-JUEGO
-    Carga json
-    Lee dict
-    jugador1 hace x mientras jugador2 espera
-    Guarda el dict
-    Guarda dict en json
-
-    Carga json
-    Lee dict
-    jugador2 hace x
-    jugador 1 espera
-    Guarda el dict
-    Guarda dict en json
-"""
-
 
 def registrar_movimiento(movimientos: set, coordenada: tuple, resultado: str) -> None:
     """
