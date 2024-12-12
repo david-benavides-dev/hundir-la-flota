@@ -16,6 +16,7 @@ def registrar_movimiento(movimientos: set, coordenada: tuple, resultado: str) ->
     """
 
 
+# DONE
 def verificar_movimiento(movimientos: set, coordenadas: tuple) -> bool:
     """
     Verifica si un movimiento ya ha sido realizado en las coordenadas dadas.
@@ -84,15 +85,24 @@ def actualizar_tablero(tablero: list, coordenada: tuple, resultado: str) -> None
     """
 
 
-def esperar_turno_ataque(jugador: str, configuracion_default: dict, carpetas_ficheros: str, nombre_partida: str):
+def esperar_turno_ataque(jugador: str, configuracion_default: dict, carpetas_ficheros: str, nombre_partida: str, configuracion_jugador: dict, numero_jugador: str):
     """
     Espera hasta que sea el turno del jugador.
     """
     print(f"Esperando ataque...")
     while True:
+        limpiar_terminal()
         config_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
+        configuracion_jugador = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
+        print(f"Turno de Jugador {configuracion_default['turno_actual'][1]}\n")
+        print(mostrar_tablero(configuracion_jugador['tablero'], "estado"))
         turno_actual = config_default['turno_actual']
+
+        # Debe actualizar el tablero en esperar_turno_ataque para ir mostrandolo con los ataques realizados.
+        # Cargar y mostrar tablero en cada iteracion con sleep de 2.
+
         if turno_actual == jugador:
+            time.sleep(configuracion_default['tiempo_refresco'])
             return None
         time.sleep(configuracion_default['tiempo_refresco'])
 
@@ -128,10 +138,10 @@ def jugar(configuracion_j1: dict, configuracion_j2: dict, configuracion_default:
 
         else:
             limpiar_terminal()
-            print(f"Turno de Jugador {configuracion_default['turno_actual'][1]}\n")
-            print(mostrar_tablero(configuracion_jugador['tablero'], "estado"))
-            esperar_turno_ataque(numero_jugador, configuracion_default, carpetas_ficheros, nombre_partida)
+            esperar_turno_ataque(numero_jugador, configuracion_default, carpetas_ficheros, nombre_partida, configuracion_jugador, numero_jugador)
             configuracion_jugador = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
             configuracion_enemigo = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{jugador_enemigo}.json")
             configuracion_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
             limpiar_terminal()
+
+# Debe actualizar el tablero en esperar_turno_ataque para ir mostrandolo con los ataques realizados.
