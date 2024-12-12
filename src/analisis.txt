@@ -1,9 +1,19 @@
 Secciones lógicas para organizar el código por archivos:
 
 
-config.py
-utils.py
-juego.py
+1 config.py
+    Funciones referentes a la configuración del juego.
+    Quizá cargar y guardar json también aquí.
+
+2 utils.py
+    Funciones auxiliares como color, limpiar_terminal, pausa... quiza pedir coordenadas y cargar guardar json.
+
+3 juego.py
+    Funciones sobre el juego. Atacar, mostrar tablero, esperar turno..
+
+4 main.py
+    Código relacionado al main y ya. Lógica de empezar la partida.
+
 
 
 """
