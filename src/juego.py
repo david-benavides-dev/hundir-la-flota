@@ -1,5 +1,5 @@
 import time
-from main import limpiar_terminal, mostrar_tablero, pedir_coordenadas, color, cargar_json
+from main import limpiar_terminal, mostrar_tablero, pedir_coordenadas, color, cargar_json, guardar_json
 
 """
 JUEGO
@@ -18,7 +18,7 @@ JUEGO
 """
 
 
-def esperar_turno(jugador: str, configuracion_default: dict, carpetas_ficheros: str, nombre_partida: str):
+def esperar_turno_ataque(jugador: str, configuracion_default: dict, carpetas_ficheros: str, nombre_partida: str):
     """Espera hasta que sea el turno del jugador."""
     print(f"Esperando ataque...")
     while True:
@@ -26,8 +26,6 @@ def esperar_turno(jugador: str, configuracion_default: dict, carpetas_ficheros: 
         turno_actual = config_default['turno_actual']
         if turno_actual == jugador:
             return None
-            time.sleep(2)
-            break
         time.sleep(configuracion_default['tiempo_refresco'])
 
 
@@ -50,21 +48,25 @@ def jugar(configuracion_j1: dict, configuracion_j2: dict, configuracion_default:
         if configuracion_default['turno_actual'] == numero_jugador:
             print(f"Turno de Jugador {configuracion_default['turno_actual'][1]}\n")
             print(mostrar_tablero(configuracion_enemigo['tablero'], "ataque"))
-            print(color("--- Tiempo de espera máximo: 30 segundos ---"))
-            y, x = pedir_coordenadas((color("Introduce coordenadas para atacar >> ")), configuracion_default['dimensiones_tablero'])
+            y, x = pedir_coordenadas((color("Introduce coordenadas para atacar (fila, columna) >> ")), configuracion_default['dimensiones_tablero'])
             configuracion_default['turno_actual'] = jugador_enemigo
+            guardar_json(carpetas_ficheros, configuracion_default, nombre_partida)
+            guardar_json(carpetas_ficheros, configuracion_jugador, nombre_partida, numero_jugador)
+            guardar_json(carpetas_ficheros, configuracion_enemigo, nombre_partida, jugador_enemigo)
             configuracion_jugador = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
             configuracion_enemigo = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{jugador_enemigo}.json")
             configuracion_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
             limpiar_terminal()
 
         else:
+            limpiar_terminal()
             print(f"Turno de Jugador {configuracion_default['turno_actual'][1]}\n")
             print(mostrar_tablero(configuracion_jugador['tablero'], "estado"))
-            esperar_turno(numero_jugador, configuracion_default, carpetas_ficheros, nombre_partida)
+            esperar_turno_ataque(numero_jugador, configuracion_default, carpetas_ficheros, nombre_partida)
             configuracion_jugador = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
             configuracion_enemigo = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{jugador_enemigo}.json")
             configuracion_default = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.json")
             limpiar_terminal()
+
 
     print("Partida finalizada")

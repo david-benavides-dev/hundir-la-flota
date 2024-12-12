@@ -1,4 +1,4 @@
-# TODO Empezar y finalizar lógica para jugar la partida.
+# TODO finalizar lógica para jugar la partida. (funcionalidad de disparar y condicion de ganador)
 # TODO Añadir sonidos.
 # TODO Refactorizar.
 # TODO dividir código en varios archivos para legibilidad.
@@ -150,7 +150,6 @@ def crear_carpeta_inicial(carpeta_root: str) -> None:
 
 
 # TODO Permitir barcos tanto en horizontal como vertical.
-# BUG No debería dejar colocar un barco si es mas grande que coordenadas (EJ barco de 5 en 9,9) <- fixed
 def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_barco: str) -> tuple[dict, list]:
     """
     Coloca un barco en el tablero si las coordenadas son válidas.
@@ -176,7 +175,8 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], nombre_b
             tablero[y][x+i] = "B"
             estado_barco[f"[{y}, {x+i}]"] = "B"
             coordenadas_barco.append([y, x+i])
-
+        print(f"Barco {nombre_barco} colocado con éxito.")
+        time.sleep(2)
         return estado_barco, coordenadas_barco
     except IndexError:
         print("*ERROR* No puedes colocar el barco ahí")
@@ -258,9 +258,10 @@ def crear_configuracion_jugador(barcos: dict, nombre_jugador: str) -> dict:
     for nombre, datos in barcos.items():
         i = 0
         while i < datos["numero"]:
+            print(f"\n¡{nombre_jugador}!, es hora de colocar tus barcos.")
             print(mostrar_tablero(tablero))
-            coordenadas = pedir_coordenadas(f"Introduce coordenadas para colocar '{nombre}' ({i+1}/{datos['numero']}) >> ", 10)
-            estado_barco, coordenadas_barco = colocar_barco(tablero, datos, coordenadas, f"{nombre}{i+1}")
+            coordenadas = pedir_coordenadas(f"⚓ Introduce coordenadas para colocar '{nombre}' (T{datos['tamano']}) [{i+1}/{datos['numero']}] >> ", 10)
+            estado_barco, coordenadas_barco = colocar_barco(tablero, datos, coordenadas, f"{nombre} #{i+1}")
             if estado_barco and coordenadas_barco:
                 flota[f"{nombre}{i+1}"] = {
                     "coordenadas": coordenadas_barco,
@@ -417,6 +418,20 @@ def cargar_json(ruta_archivo: str, max_reintentos: int = 4, pausa_ms: int = 150)
         return None
 
 
+def guardar_json(ruta_archivo: str, configuracion: dict, nombre_partida: str, numero_jugador = None) -> None:
+    """
+    
+    """
+    if numero_jugador is None:
+
+        with open(f"{ruta_archivo}/{nombre_partida}/{nombre_partida}.json", "w") as archivo:
+            json.dump(configuracion, archivo, indent = 4)
+    else:
+
+        with open(f"{ruta_archivo}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json", "w") as archivo:
+            json.dump(configuracion, archivo, indent = 4)
+
+
 def main():
 
     limpiar_terminal()
@@ -429,9 +444,9 @@ def main():
 
         case 1:
 
-            nombre_j1 = input(color("Nombre J1 >> "))
+            nombre_j1 = input(color("Nombre J1 >> ")).capitalize()
             numero_jugador = "j1"
-            nombre_partida = input(color("Introduce el nombre de la partida >> "))
+            nombre_partida = input(color("Introduce el nombre de la partida >> ")).strip()
             crear_carpeta_inicial(carpetas_ficheros)
             crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j1, numero_jugador)
             print("Comenzando partida...")
@@ -460,12 +475,12 @@ def main():
             validar_partida = False
 
             while not validar_partida:
-                nombre_partida = input(color("Introduce el nombre de la partida >> "))
+                nombre_partida = input(color("Introduce el nombre de la partida >> ")).strip()
                 config_j1 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.j1.json")
                 if config_j1 is None:
                     print("*ERROR* La partida no existe.")
                 else:
-                    nombre_j2 = input((color("Nombre J2 >> ")))
+                    nombre_j2 = input((color("Nombre J2 >> "))).capitalize()
                     numero_jugador = "j2"
                     config_j1 = cargar_json(f"{carpetas_ficheros}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
                     crear_configuracion_inicial(carpetas_ficheros, config_default, nombre_partida, config_barcos, nombre_j2, numero_jugador)
