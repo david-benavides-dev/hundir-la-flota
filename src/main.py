@@ -220,7 +220,7 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], orientac
         return False, False
 
 
-def pedir_orientacion_direccion() -> tuple:
+def pedir_orientacion_direccion(msj: str) -> tuple:
     """
     
     """
@@ -228,7 +228,7 @@ def pedir_orientacion_direccion() -> tuple:
 
     while not validar_orientacion_direccion:
         try:
-            orientacion, direccion = input("Introduce orientación y direccion con formato 'H' o 'V,'+' o '-' >> ").upper().split(",")
+            orientacion, direccion = input(msj).upper().split(",")
 
             if orientacion == "H" or orientacion == "V" and direccion == "+" or direccion == "-":
                 validar_orientacion_direccion = True
@@ -255,20 +255,28 @@ def pedir_coordenadas(msj: str, dimensiones: int) -> list:
     while not validar_coordenadas:
         try:
             y, x = input(msj).split(",")
-            if validar_num(y) and validar_num(x):
+            if validar_num(y):
                 y = int(y) - 1
+                x = convertir_letra(x)
                 x = int(x) - 1
                 if not (0 <= y < dimensiones and 0 <= x < dimensiones):
-                    raise Exception("*ERROR* Números no válidos.")
+                    raise Exception("*ERROR* Coordenadas fuera de rango.")
                 # Limpia directamente los espacios en el caso de que un usuario los introduzca en el input al pasarlos a int.
                 return [y, x]
         except ValueError:
-            print("*ERROR* Coordenadas no válidas. El input debe ser 'N,N' (separado con coma).")
+            print("*ERROR* Coordenadas no válidas. El input debe ser 'Numero,Letra' (separado con coma).")
             validar_coordenadas = False
         except Exception as e:
             print(e)
-            limpiar_terminal()
             validar_coordenadas = False
+
+
+def convertir_letra(letra: str) -> int:
+    """
+    Convierte una letra a número mediante su indice en el abecedario + 1
+    """
+    alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    return alfabeto.index(letra) + 1
 
 
 def validar_num(num: str) -> bool:
@@ -298,7 +306,7 @@ def crear_configuracion_jugador(barcos: dict, nombre_jugador: str) -> dict:
         nombre_jugador (str): Nombre del jugador.
 
     Returns:
-        dict: Configuración del jugador con el tablero y la flota con el estado de cada uno de los barcos.
+        dict: Configuración del jugador con el tablero y la flota junto al estado de cada uno de los barcos.
     """
     tablero = crear_tablero(config_default["dimensiones_tablero"])
 
@@ -309,23 +317,24 @@ def crear_configuracion_jugador(barcos: dict, nombre_jugador: str) -> dict:
     for nombre, datos in barcos.items():
         i = 0
         while i < datos["numero"]:
-            print(f"\n¡{nombre_jugador}!, es hora de colocar tus barcos.")
+            print(f"\n{nombre_jugador}, es hora de colocar tus barcos.")
             print(mostrar_tablero(tablero))
-            coordenadas = pedir_coordenadas(f"⚓ Introduce coordenadas para colocar '{nombre}' (T{datos['tamano']}) [{i+1}/{datos['numero']}] >> ", 10)
-            orientacion_direccion = pedir_orientacion_direccion()
+            coordenadas = pedir_coordenadas(f"⚓ Introduce coordenadas para colocar '{nombre}' (T{datos['tamano']}) [{i+1}/{datos['numero']}] >> ", config_default['dimensiones_tablero'])
+            orientacion_direccion = pedir_orientacion_direccion("⚓ Introduce orientación y direccion '[H o V],[+ o -]' >> ")
             estado_barco, coordenadas_barco = colocar_barco(tablero, datos, coordenadas, orientacion_direccion, f"{nombre} #{i+1}")
             if estado_barco and coordenadas_barco:
                 flota[f"{nombre}{i+1}"] = {
                     "coordenadas": coordenadas_barco,
                     "estado": estado_barco
                 }
+                time.sleep(2)
                 limpiar_terminal()
                 i += 1
 
     config_jugador = {"nombre": nombre_jugador,
                           "tablero": tablero,
                           "barcos": flota,
-                          "movimientos": [{}],
+                          "movimientos": [],
                           }
 
     print(mostrar_tablero(tablero))
@@ -395,9 +404,8 @@ def mostrar_tablero(tablero: list, modo: str = "mostrar") -> str:
     Returns:
         str: Tablero formateado como una cadena de texto.
     """
-    # TODO cambiar coordenadas a letras + números maybe.
-    indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+    indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     # Condición para ocultar la posición de los barcos a la hora de mostrar el tablero en estado "ataque".
     # Itera sobre el tablero original, haciendo una réplica del mismo a otro tablero vacío y ocultando las 'B' por '~'.
