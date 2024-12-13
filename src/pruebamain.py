@@ -4,7 +4,6 @@
 # TODO dividir código en varios archivos para legibilidad.
 # TODO nomenclatura funciones/variables.
 # TODO comentarios.
-# TODO permitir orientación de barco H V y + o -.
 # TODO cambiar mostrar_tablero y menu a un print.
 # TODO utilizar config_default para los barcos en vez de dos diccionarios diferentes.
 # TODO MAYBE hacer que config_default sea un json y cargarlo para crear la configuracion por defecto + los barcos.
@@ -149,7 +148,6 @@ def crear_carpeta_inicial(carpeta_root: str) -> None:
     return None
 
 
-# BUG No debería dejar colocar un barco que se salga del tablero.
 def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], orientacion_direccion: tuple, nombre_barco: str) -> tuple[dict, list]:
     """
     Coloca un barco en el tablero si las coordenadas son válidas.
@@ -169,27 +167,27 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], orientac
     coordenadas_barco = []
 
     try:
-        # Orientación horizontal hacia la derecha <- DONE
+        # Orientación horizontal hacia la derecha
         if orientacion == "H" and direccion == "+":
             for i in range(barco['tamano']):
-                if tablero[y][x+i] != "~" or (x-i) < 0:
+                if tablero[y][x+i] != "~":
                     raise Exception("*ERROR* No puedes colocar un barco ahí.")
             for i in range(barco['tamano']):
                 tablero[y][x+i] = "B"
                 estado_barco[f"[{y}, {x+i}]"] = "B"
                 coordenadas_barco.append([y, x+i])
             print(f"Barco {nombre_barco} colocado con éxito.")
-        # TODO Orientación Vertical hacia la abajo <- DONE
+        # Orientación Vertical hacia la abajo
         elif orientacion == "V" and direccion == "+":
             for i in range(barco['tamano']):
-                if tablero[y+i][x] != "~" or (x-i) < 0:
+                if tablero[y+i][x] != "~" or (y+i) < 0:
                     raise Exception("*ERROR* No puedes colocar un barco ahí.")
             for i in range(barco['tamano']):
                 tablero[y+i][x] = "B"
                 estado_barco[f"[{y+i}, {x}]"] = "B"
                 coordenadas_barco.append([y+i, x])
             print(f"Barco {nombre_barco} colocado con éxito.")
-        # TODO Orientación Horizontal hacia la izquierda <- DONE
+        # Orientación Horizontal hacia la izquierda
         elif orientacion == "H" and direccion == "-":
             for i in range(barco['tamano']):
                 if tablero[y][x-i] != "~" or (x-i) < 0:
@@ -199,10 +197,10 @@ def colocar_barco(tablero: list, barco: dict, coordenadas: list[tuple], orientac
                 estado_barco[f"[{y}, {x-i}]"] = "B"
                 coordenadas_barco.append([y, x-i])
             print(f"Barco {nombre_barco} colocado con éxito.")
-        # TODO Orientación Vertical hacia arriba <- DONE
+        # Orientación Vertical hacia arriba
         else:
             for i in range(barco['tamano']):
-                if tablero[y-i][x] != "~" or (x-i) < 0:
+                if tablero[y-i][x] != "~" or (y-i) < 0:
                     raise Exception("*ERROR* No puedes colocar un barco ahí.")
             for i in range(barco['tamano']):
                 tablero[y-i][x] = "B"
