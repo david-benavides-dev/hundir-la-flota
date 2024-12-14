@@ -1,5 +1,91 @@
 import time
-from main import limpiar_terminal, mostrar_tablero, pedir_coordenadas, color, cargar_json, guardar_json
+
+from config import cargar_json, guardar_json
+from main import pedir_coordenadas
+from utils import *
+
+def crear_tablero(dimension: int) -> list[list]:
+    """
+    Crea un tablero vacío de tamaño dimension x dimension.
+
+    Args:
+        dimension (int): Tamaño del tablero (número de filas y columnas).
+
+    Returns:
+        list[list]: Una lista de listas que representa el tablero, con cada celda inicializada como "~" (olas).
+    """
+    tablero = []
+
+    for i in range(dimension):
+        tablero.append([])
+        for _ in range(dimension):
+            tablero[i].append("~")
+
+    return tablero
+
+
+def mostrar_tablero(tablero: list, modo: str = "mostrar") -> None:
+    """
+    Genera y muestra una representación visual del tablero en formato string por consola. Dependiendo del modo, puede ocultar los barcos intactos o mostrar el tablero en su totalidad.
+
+    Args:
+        tablero (list): Matriz que representa el tablero, donde cada celda contiene un valor como "~", "B", etc.
+        modo (str): Modo de visualización del tablero. Puede ser uno de los siguientes:
+            - "ataque": Muestra el tablero con los barcos ocultos (se reemplazan los barcos por "~").
+            - "estado": Muestra el tablero con el estado actual.
+            - "finalizada": Muestra el título "Partida finalizada".
+            - "mostrar" (predeterminado): Muestra el tablero con todos los barcos y celdas intactas.
+    """
+
+    indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+    # Condición para ocultar la posición de los barcos a la hora de mostrar el tablero en estado "ataque".
+    # Itera sobre el tablero original, haciendo una réplica del mismo a otro tablero vacío y ocultando las 'B' por '~'.
+    if modo == "ataque":
+        tablero_ataque = []
+        for fila in tablero:
+            fila_ataque = []
+            for celda in fila:
+                if celda == "B":
+                    fila_ataque.append("~")
+                else:
+                    fila_ataque.append(celda)
+            tablero_ataque.append(fila_ataque)
+        titulo = f"{' ' * len(tablero[0])}Tablero de ataque:\n"
+    elif modo == "estado":
+        titulo = f"{' ' * len(tablero[0])}Tablero de estado:\n"
+    elif modo == "finalizada":
+        titulo = f"{' ' * len(tablero[0])}Partida finalizada\n"
+    else:
+        titulo = f"{' ' * len(tablero[0])}Coloca tus barcos:\n"
+
+    i = 0
+    coordenadas_inferior = "\n    "
+    for fila in tablero:
+        coordenadas_inferior += f" {indice_letras[i]} "
+        i += 1
+
+    coordenadas_inferior += " " + "\n"
+
+    marco_superior = "   ╔" + ("═" * (len(tablero[0]) * 3)) + "╗"
+    marco_inferior = "   ╚" + ("═" * (len(tablero[0]) * 3)) + "╝"
+
+    i = 1
+
+    tablero_completo = ""
+
+    for fila in tablero_ataque if modo == "ataque" else tablero:
+        if i < 10:
+            tablero_completo += f"\n {i} {color('║')} {'  '.join(map(str, fila))} {color('║')}" + f""
+        else:
+            tablero_completo += f"\n{i} {color('║')} {'  '.join(map(str, fila))} {color('║')}" + f""
+        i += 1
+    
+    tablero_completo = titulo + color(marco_superior) + tablero_completo + "\n" + color(marco_inferior) + coordenadas_inferior
+
+    print(tablero_completo)
+
+    return None
 
 
 def verificar_ganador(config_jugador: dict) -> bool:

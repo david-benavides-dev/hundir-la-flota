@@ -1,8 +1,10 @@
-# TODO IMPORTANTE LETRAS COORDENADAS VALIDACION QUE SEA LEN 3
-from juego import *
-import os
-import time
 import json
+import time
+import os
+
+from juego import crear_tablero, mostrar_tablero
+from main import pedir_coordenadas
+from utils import limpiar_terminal
 
 # Constante con las opciones disponibles
 opciones = "1","2","3"
@@ -23,101 +25,6 @@ config_default = {
     "turnos_jugados": 0,
     "turno_actual": "j1"
 }
-
-
-def pausa() -> None:
-    """
-    Pausa el programa hasta que el usuario presione ENTER.
-    """
-    input("Presiona ENTER para continuar...")
-
-    return None
-
-
-def limpiar_terminal() -> None:
-    """
-    Limpia la terminal o consola independientemente del sistema operativo.
-    """
-    comando = ""
-    if os.name == 'nt':
-        comando = 'cls'
-    else:
-        comando = 'posix'
-    os.system(comando)
-
-    return None
-
-
-def color(texto: str, color: int = 39):
-    """
-    Aplica un color ANSI al texto proporcionado, basado en el número de color especificado por parámetro.
-
-    Args:
-        texto (str): El texto al que se le aplicará el color.
-        color (int): Un número entero que representa el color ANSI. Por defecto es 39 (azul).
-
-    Returns:
-        str: El texto con el color aplicado en formato ANSI.
-    """
-    return f"\033[38;5;{color}m{texto}\033[0m"
-
-
-def mostrar_menu() -> None:
-    """
-    Genera y muestra el menú principal del juego con las opciones disponibles.
-
-    Este menú se muestra con colores definidos en formateo de código ANSI.
-
-    """
-    titulo = (
-        color("P", 27) +
-        color("I", 33) +
-        color("R", 39) +
-        color("A", 45) +
-        color("T", 51) +
-        color("A", 45) +
-        color("S", 39) +
-        color(" ", 33) +
-        color("C", 27) +
-        color("A", 33) +
-        color("L", 39) +
-        color("E", 45) +
-        color("T", 51) +
-        color("E", 45) +
-        color("R", 39) +
-        color("O", 33) +
-        color("S", 27)
-    )
-
-    print(f"""
-        {color("═════════════════════════════════════════")}
-                    {titulo}             
-        {color("═════════════════════════════════════════")}
-           1. ⚓ Iniciar una nueva partida
-           2. 🌊 Unirse a una partida
-           3. 🚪 Salir
-        {color("═════════════════════════════════════════")}
-        """)
-    
-    return None
-
-
-def pedir_opcion() -> int:
-    """
-    Solicita al usuario una opción válida entre las disponibles (1, 2, 3).
-
-    Returns:
-        int: La opción seleccionada.
-    """
-    opcion = None
-    while not opcion:
-        opcion = input(color("Yaaarrr? >> "))
-        if opcion not in opciones:
-            print("Opción no válida")
-            opcion = None
-
-    return int(opcion)
-
 
 def crear_carpeta_partidas(carpeta_root: str) -> None:
     """
@@ -243,71 +150,7 @@ def pedir_orientacion_direccion(msj: str) -> tuple:
 
         except ValueError:
             print(f"*ERROR* Debes introducir H o V seguido de + o - (separados por coma).")
-
-
-def pedir_coordenadas(msj: str, dimensiones: int) -> list:
-    """
-    Solicita coordenadas válidas al usuario para colocar un barco en el tablero.
-
-    Args:
-        msj (str): Mensaje a mostrar al usuario.
-        dimensiones (int): Tamaño máximo permitido para las coordenadas.
-
-    Returns:
-        list: Coordenadas [y, x] válidas para el tablero.
-    """
-    validar_coordenadas = False
-    while not validar_coordenadas:
-        try:
-            y, x = input(msj).split(",")
-            if validar_num(y):
-                y = int(y) - 1
-                x = convertir_letra(x)
-                x = int(x) - 1
-                if not (0 <= y < dimensiones and 0 <= x < dimensiones):
-                    raise Exception("*ERROR* Coordenadas fuera de rango.")
-                # Limpia directamente los espacios en el caso de que un usuario los introduzca en el input al pasarlos a int.
-                return [y, x]
-        except ValueError:
-            print("*ERROR* Coordenadas no válidas. El input debe ser 'Numero,Letra' (separado con coma).")
-            validar_coordenadas = False
-        except Exception as e:
-            print(e)
-            validar_coordenadas = False
-
-
-def convertir_letra(letra: str) -> int:
-    """
-    Convierte una letra a número mediante su índice en el abecedario + 1.
-
-    Args:
-        letra (str): Letra a convertir, que debe estar entre 'A' y 'Z'.
-
-    Returns:
-        int: Número correspondiente al índice de la letra en el abecedario + 1.
-    """
-    alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    letra = letra.upper()
-    return alfabeto.index(letra) + 1
-
-
-def validar_num(num: str) -> bool:
-    """
-    Valida si una cadena de texto puede ser convertida a un número entero.
-
-    Args:
-        num (str): El string que se quiere validar como número.
-
-    Returns:
-        bool: True si es válido, False si no lo es.
-    """
-    try:
-        int(num)
-        return True
-    except ValueError:
-        print("*ERROR* Debes introducir números")
-        return False
-
+            
 
 def crear_configuracion_jugador(barcos: dict, nombre_jugador: str) -> dict:
     """
@@ -385,91 +228,6 @@ def crear_configuracion_inicial(carpeta_root: str, datos_iniciales: dict, nombre
     
     return None
 
-
-def crear_tablero(dimension: int) -> list[list]:
-    """
-    Crea un tablero vacío de tamaño dimension x dimension.
-
-    Args:
-        dimension (int): Tamaño del tablero (número de filas y columnas).
-
-    Returns:
-        list[list]: Una lista de listas que representa el tablero, con cada celda inicializada como "~" (olas).
-    """
-    tablero = []
-
-    for i in range(dimension):
-        tablero.append([])
-        for _ in range(dimension):
-            tablero[i].append("~")
-
-    return tablero
-
-
-def mostrar_tablero(tablero: list, modo: str = "mostrar") -> None:
-    """
-    Genera y muestra una representación visual del tablero en formato string por consola. Dependiendo del modo, puede ocultar los barcos intactos o mostrar el tablero en su totalidad.
-
-    Args:
-        tablero (list): Matriz que representa el tablero, donde cada celda contiene un valor como "~", "B", etc.
-        modo (str): Modo de visualización del tablero. Puede ser uno de los siguientes:
-            - "ataque": Muestra el tablero con los barcos ocultos (se reemplazan los barcos por "~").
-            - "estado": Muestra el tablero con el estado actual.
-            - "finalizada": Muestra el título "Partida finalizada".
-            - "mostrar" (predeterminado): Muestra el tablero con todos los barcos y celdas intactas.
-    """
-
-    indice_letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-    # Condición para ocultar la posición de los barcos a la hora de mostrar el tablero en estado "ataque".
-    # Itera sobre el tablero original, haciendo una réplica del mismo a otro tablero vacío y ocultando las 'B' por '~'.
-    if modo == "ataque":
-        tablero_ataque = []
-        for fila in tablero:
-            fila_ataque = []
-            for celda in fila:
-                if celda == "B":
-                    fila_ataque.append("~")
-                else:
-                    fila_ataque.append(celda)
-            tablero_ataque.append(fila_ataque)
-        titulo = f"{' ' * len(tablero[0])}Tablero de ataque:\n"
-    elif modo == "estado":
-        titulo = f"{' ' * len(tablero[0])}Tablero de estado:\n"
-    elif modo == "finalizada":
-        titulo = f"{' ' * len(tablero[0])}Partida finalizada\n"
-    else:
-        titulo = f"{' ' * len(tablero[0])}Coloca tus barcos:\n"
-
-    i = 0
-    coordenadas_inferior = "\n    "
-    for fila in tablero:
-        coordenadas_inferior += f" {indice_letras[i]} "
-        i += 1
-
-    coordenadas_inferior += " " + "\n"
-
-    marco_superior = "   ╔" + ("═" * (len(tablero[0]) * 3)) + "╗"
-    marco_inferior = "   ╚" + ("═" * (len(tablero[0]) * 3)) + "╝"
-
-    i = 1
-
-    tablero_completo = ""
-
-    for fila in tablero_ataque if modo == "ataque" else tablero:
-        if i < 10:
-            tablero_completo += f"\n {i} {color('║')} {'  '.join(map(str, fila))} {color('║')}" + f""
-        else:
-            tablero_completo += f"\n{i} {color('║')} {'  '.join(map(str, fila))} {color('║')}" + f""
-        i += 1
-    
-    tablero_completo = titulo + color(marco_superior) + tablero_completo + "\n" + color(marco_inferior) + coordenadas_inferior
-
-    print(tablero_completo)
-
-    return None
-
-
 def cargar_json(ruta_archivo: str, max_reintentos: int = 4, pausa_ms: int = 150) -> dict | None:
     """
     Carga un archivo JSON en un diccionario con reintentos en caso de error por bloqueo (OSError e IOError).
@@ -517,81 +275,3 @@ def guardar_json(ruta_archivo: str, configuracion: dict, nombre_partida: str, nu
 
         with open(f"{ruta_archivo}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json", "w") as archivo:
             json.dump(configuracion, archivo, indent = 4)
-
-
-def main():
-    """
-    Función principal que controla el flujo del juego.
-
-    Muestra el menú principal y ejecuta las acciones según la opción seleccionada por el jugador.
-    Existen tres opciones:
-        1. Iniciar una nueva partida: Solicita nombre de jugadores, crea los archivos necesarios y espera a que el segundo jugador se una.
-        2. Unirse a una partida existente: Permite al segundo jugador unirse a una partida ya creada.
-        3. Salir: Termina la ejecución del programa.
-
-    En el caso de la opción 1, espera a que el segundo jugador se una antes de comenzar la partida.
-    En la opción 2, se valida que la partida exista antes de permitir que el segundo jugador se una.
-    """
-    limpiar_terminal()
-
-    mostrar_menu()
-
-    opcion = pedir_opcion()
-
-    match opcion:
-
-        case 1:
-
-            nombre_j1 = input(color("Nombre J1 >> ")).capitalize()
-            numero_jugador = "j1"
-            nombre_partida = input(color("Introduce el nombre de la partida >> ")).strip()
-            crear_carpeta_partidas(DIRECTORIO_PARTIDAS)
-            crear_configuracion_inicial(DIRECTORIO_PARTIDAS, config_default, nombre_partida, nombre_j1, numero_jugador)
-            time.sleep(2)
-            print("Esperando a J2...")
-            config_j1 = cargar_json(f"{DIRECTORIO_PARTIDAS}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
-            configuracion_default = cargar_json(f"{DIRECTORIO_PARTIDAS}/{nombre_partida}/{nombre_partida}.json")
-
-            validar_partida = False
-
-            while not validar_partida:
-                # Meter cargar_json directamente en el if porque retorna None si hay excepcion.
-                config_j2 = cargar_json(f"{DIRECTORIO_PARTIDAS}/{nombre_partida}/{nombre_partida}.j2.json")
-                if config_j2 is None:
-                    time.sleep(3)
-                else:
-                    config_j2 = cargar_json(f"{DIRECTORIO_PARTIDAS}/{nombre_partida}/{nombre_partida}.j2.json")
-                    limpiar_terminal()
-
-                    validar_partida = True
-
-            jugar(config_j1, config_j2, configuracion_default, numero_jugador, DIRECTORIO_PARTIDAS, nombre_partida)
-
-        case 2:
-
-            validar_partida = False
-
-            while not validar_partida:
-                nombre_partida = input(color("Introduce el nombre de la partida >> ")).strip()
-                config_j1 = cargar_json(f"{DIRECTORIO_PARTIDAS}/{nombre_partida}/{nombre_partida}.j1.json")
-                if config_j1 is None:
-                    print("*ERROR* La partida no existe.")
-                else:
-                    nombre_j2 = input((color("Nombre J2 >> "))).capitalize()
-                    numero_jugador = "j2"
-                    config_j1 = cargar_json(f"{DIRECTORIO_PARTIDAS}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
-                    crear_configuracion_inicial(DIRECTORIO_PARTIDAS, config_default, nombre_partida, nombre_j2, numero_jugador)
-                    config_j2 = cargar_json(f"{DIRECTORIO_PARTIDAS}/{nombre_partida}/{nombre_partida}.{numero_jugador}.json")
-                    configuracion_default = cargar_json(f"{DIRECTORIO_PARTIDAS}/{nombre_partida}/{nombre_partida}.json")
-                    
-                    validar_partida = True
-            
-            jugar(config_j1, config_j2, configuracion_default, numero_jugador, DIRECTORIO_PARTIDAS, nombre_partida)
-
-        case 3:
-
-            exit()
-
-
-if __name__ == "__main__":
-    main()
