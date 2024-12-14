@@ -235,7 +235,7 @@ def pedir_orientacion_direccion(msj: str) -> tuple:
         try:
             orientacion, direccion = input(msj).strip().upper().split(",")
 
-            if orientacion == "H" or orientacion == "V" and direccion == "+" or direccion == "-":
+            if (orientacion == "H" or orientacion == "V") and (direccion == "+" or direccion == "-"):
                 validar_orientacion_direccion = True
                 return (orientacion, direccion)
             else:
