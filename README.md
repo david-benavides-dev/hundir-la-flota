@@ -191,4 +191,4 @@ Introduce coordenadas para atacar (fila, columna) >>
 10. En consola, el "tablero de ataque" del jugador activo se muestra actualizado. 
 11. Se actualiza el archivo global con el nuevo turno: Si es exitoso, se cambia el turno al siguiente jugador.
 12. Volvemos al paso 4. 
-13. Se declara al ganador y se finaliza el juego. 
+13. Se declara al ganador y se finaliza el juego, mostrando su tablero, el jugador que ha ganado y los turnos que ha tenido la partida.
