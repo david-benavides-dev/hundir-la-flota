@@ -6,7 +6,7 @@
 
 
 ### Objetivo del juego:
-Juego de Hundir la flota Multijugador utilizando archivos JSON para compartir información entre turnos.
+Hundir todos los barcos del rival antes de que el hunda los tuyos.
 
 
 ### Funcionamiento:
@@ -144,7 +144,47 @@ Descripción del flujo del programa:
 3. Cada jugador dispone de su propio archivo JSON con su tablero, barcos, y registro de movimientos. Al iniciar, se generará el tablero en base a la configuración de los barcos, preguntando por la posición de cada uno. Esta posición tiene que ser correcta y no puede superponerse con otro barco, ni estar fuera del tablero. 
 4. El jugador que crea la partida siempre será el jugador activo. Siendo el otro, el jugador pasivo.
 5. Se muestra los tableros actualizados: jugador activo "tablero de ataque", y jugador pasivo "tablero de estado". 
+```
+Turno de Jugador 1
+
+          Tablero de estado:
+   ╔══════════════════════════════╗
+ 1 ║ B  B  B  B  B  ~  ~  ~  ~  ~ ║
+ 2 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 3 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 4 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 5 ║ B  ~  ~  ~  B  B  ~  ~  ~  ~ ║
+ 6 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 7 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 8 ║ ~  ~  ~  ~  ~  ~  B  B  ~  ~ ║
+ 9 ║ B  ~  ~  ~  ~  ~  ~  B  ~  ~ ║
+10 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+   ╚══════════════════════════════╝
+     A  B  C  D  E  F  G  H  I  J
+
+Esperando ataque...
+```
 6. Se solicita al jugador activo que introduzca una coordenada para atacar.
+```
+Turno de Jugador 1
+
+          Tablero de ataque:
+   ╔══════════════════════════════╗
+ 1 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 2 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 3 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 4 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 5 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 6 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 7 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 8 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+ 9 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+10 ║ ~  ~  ~  ~  ~  ~  ~  ~  ~  ~ ║
+   ╚══════════════════════════════╝
+     A  B  C  D  E  F  G  H  I  J
+
+Introduce coordenadas para atacar (fila, columna) >>
+```
 7. En el JSON del jugador pasivo: Se comprueba el ataque realizado y se registra el movimiento en el estado de los barcos y el tablero. 
 8. En el JSON del jugador activo: Se registra el movimiento y su resultado. 
 9. En consola, el "tablero de estado" del jugador pasivo se actualiza con el resultado del ataque. 
