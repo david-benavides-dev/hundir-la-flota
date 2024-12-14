@@ -1,4 +1,3 @@
-# TODO IMPORTANTE LETRAS COORDENADAS VALIDACION QUE SEA LEN 3
 from juego import *
 import os
 import time
